@@ -11,8 +11,10 @@ function App() {
 
   return (
     <div id="App">
-      <p>notdir</p>
-      <button onClick={greet}>greet</button>
+      <p className="text-red-600">notdir</p>
+      <button className="btn btn-primary" onClick={greet}>
+        greet
+      </button>
       <p>{testText}</p>
     </div>
   );
