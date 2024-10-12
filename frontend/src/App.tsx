@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 
 import { main } from "../wailsjs/go/models";
 import { MultiSelection, FileOpen } from "../wailsjs/go/main/App";
-import DraggableItems from "./components/DraggableItems";
+
+import MainPage from "./pages/MainPage";
+import { TempNotdir } from "./types/TempNotdir";
+import TempNewPage from "./pages/TempNewPage";
 
 export default function App() {
   const [files, setFiles] = useState<main.FileInfo[]>([]);
@@ -16,7 +19,7 @@ export default function App() {
     await FileOpen(path);
   }
 
-  const memoizedProps = useMemo(
+  const memoizedProps = useMemo<TempNotdir>(
     () => ({
       nodes: files.map((file) => ({
         key: file.Path,
@@ -40,7 +43,9 @@ export default function App() {
       <button className="btn btn-primary" onClick={selectFiles}>
         Select Files
       </button>
-      <DraggableItems {...memoizedProps} />
+      <TempNewPage tempNotdir={memoizedProps} />
+      <div className="divider"></div>
+      <MainPage />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 export namespace main {
 	
 	export class FileInfo {
+	    Id: string;
 	    Name: string;
 	    Size: number;
 	    Mode: number;
@@ -15,6 +16,7 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Id = source["Id"];
 	        this.Name = source["Name"];
 	        this.Size = source["Size"];
 	        this.Mode = source["Mode"];

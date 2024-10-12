@@ -9,6 +9,7 @@ import (
 	stdruntime "runtime"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -34,6 +35,7 @@ func (a *App) Greet(name string) string {
 }
 
 type FileInfo struct {
+	Id      string
 	Name    string
 	Size    int64
 	Mode    fs.FileMode
@@ -58,6 +60,7 @@ func (a *App) MultiSelection() ([]FileInfo, error) {
 		}
 
 		customInfo := FileInfo{
+			Id:      uuid.NewString(),
 			Name:    fileInfo.Name(),
 			Size:    fileInfo.Size(),
 			Mode:    fileInfo.Mode(),
