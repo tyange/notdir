@@ -11,6 +11,7 @@
   "dependencies": {
     "autoprefixer": "^10.4.20",
     "daisyui": "^4.12.13",
+    "immer": "^10.1.1",
     "postcss": "^8.4.47",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -1,4 +1,6 @@
+import { Node } from "./Node";
+
 export type TempNotdir = {
-  nodes: { key: string; element: JSX.Element }[];
+  nodes: Node[];
   draggingNodeClassName: string;
 };
