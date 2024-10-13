@@ -1,9 +1,7 @@
 import { main } from "../../wailsjs/go/models";
-import { NestedNotdir } from "./NestedNotdir";
 
-export type Notdir = {
+export type NestedNotdir = {
   id: string;
   name: string;
-  notdirs: NestedNotdir[];
   files: main.FileInfo[];
 };

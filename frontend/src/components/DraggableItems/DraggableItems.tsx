@@ -1,26 +1,27 @@
 import { useState, DragEvent, CSSProperties, useCallback } from "react";
 
-import { useTempNotdirStore } from "../../stores/useTempNotdirStore";
-import { main } from "../../../wailsjs/go/models";
+import { Node } from "../../types/Node";
 
-export type DraggableChild = {
-  file: main.FileInfo;
-  element: React.ReactElement;
-};
-
-type DraggableItemsProps = {
+type DraggableItemsProps<T> = {
+  draggableItems: Node<T>[];
+  setDraggableItems: (draggableItems: Node<T>[]) => void;
   draggingNodeClassName?: string;
   draggingNodeStyles?: CSSProperties;
 };
 
-export default function DraggableItems({
+export default function DraggableItems<T>({
+  draggableItems,
+  setDraggableItems,
   draggingNodeClassName,
   draggingNodeStyles,
-}: DraggableItemsProps) {
+}: DraggableItemsProps<T>) {
   const [isDragging, setIsDragging] = useState(false);
   const [currentDraggingNode, setCurrentDraggingNode] =
     useState<null | HTMLElement>();
-  const { nodes, setNodes } = useTempNotdirStore();
+
+  function getId(item: Node<any>): string {
+    return "id" in item ? item.id : item.Id;
+  }
 
   const dragStart = useCallback((e: DragEvent) => {
     setIsDragging(true);
@@ -36,28 +37,32 @@ export default function DraggableItems({
 
   const dragOver = useCallback(
     (e: DragEvent) => {
+      e.preventDefault();
       const currentTarget = e.currentTarget;
 
       if (!isDragging || !currentDraggingNode || !currentTarget) return;
 
-      const currentItems = [...nodes];
+      const currentItems = [...draggableItems];
 
-      const draggedIndex = currentItems.findIndex(
-        (item) => item.file.Id === currentDraggingNode.id
-      );
-      const hoverIndex = currentItems.findIndex(
-        (item) => item.file.Id === currentTarget.id
-      );
+      const draggedIndex = currentItems.findIndex((item) => {
+        return getId(item) === currentDraggingNode.id;
+      });
+      const hoverIndex = currentItems.findIndex((item) => {
+        return getId(item) === currentTarget.id;
+      });
 
-      if (draggedIndex === hoverIndex) return currentItems;
+      if (draggedIndex === hoverIndex) {
+        console.log("draggedIndex === hoverIndex");
+        return currentItems;
+      }
 
       const newItems = [...currentItems];
       const [draggedItem] = newItems.splice(draggedIndex, 1);
       newItems.splice(hoverIndex, 0, draggedItem);
 
-      setNodes(newItems);
+      setDraggableItems(newItems);
     },
-    [isDragging, currentDraggingNode]
+    [isDragging, currentDraggingNode, draggableItems]
   );
 
   const dragEnd = useCallback(() => {
@@ -65,12 +70,12 @@ export default function DraggableItems({
     setCurrentDraggingNode(null);
   }, []);
 
-  function getNodeClassName(node: DraggableChild) {
+  function getNodeClassName(node: Node<T>) {
     if (
       isDragging &&
       currentDraggingNode &&
-      node.file.Id === currentDraggingNode.id &&
-      draggingNodeClassName
+      draggingNodeClassName &&
+      getId(node) === currentDraggingNode.id
     ) {
       return [node.element.props.className, draggingNodeClassName].join(" ");
     }
@@ -91,17 +96,17 @@ export default function DraggableItems({
 
   return (
     <ul>
-      {nodes.map((draggableNode) => (
+      {draggableItems.map((draggableNode) => (
         <li
-          id={draggableNode.file.Id}
-          key={draggableNode.file.Id}
+          id={getId(draggableNode)}
+          key={getId(draggableNode)}
           draggable
           className={getNodeClassName(draggableNode)}
           onDragStart={dragStart}
           onDragEnter={dragEnter}
           onDragOver={dragOver}
           onDragEnd={dragEnd}
-          style={getStyles(draggableNode.file.Id)}
+          style={getStyles(getId(draggableNode))}
         >
           {draggableNode.element}
         </li>

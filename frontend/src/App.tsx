@@ -1,11 +1,12 @@
 import { MultiSelection, FileOpen } from "../wailsjs/go/main/App";
+import { main } from "../wailsjs/go/models";
 
 import MainPage from "./pages/MainPage";
-import TempNewPage from "./pages/TempNewPage";
+import NewPage from "./pages/NewPage";
 
 import { useTempNotdirStore } from "./stores/useTempNotdirStore";
 
-import { Node } from "./types/Node";
+import { TempNotdir } from "./types/TempNotdir";
 
 export default function App() {
   const { setNodes } = useTempNotdirStore();
@@ -14,7 +15,8 @@ export default function App() {
     const result = await MultiSelection();
     setNodes(
       result.map((file) => ({
-        file,
+        id: file.Id,
+        nodeInfo: file,
         element: <div className="border border-gray-50">{file.Name}</div>,
       }))
     );
@@ -24,8 +26,8 @@ export default function App() {
     await FileOpen(path);
   }
 
-  async function saveHandler(nodes: Node[]) {
-    console.log(nodes);
+  async function saveHandler(notdir: TempNotdir<main.FileInfo>) {
+    console.log(notdir);
   }
 
   return (
@@ -34,7 +36,7 @@ export default function App() {
       <button className="btn btn-primary" onClick={selectFiles}>
         Select Files
       </button>
-      <TempNewPage saveHandler={saveHandler} />
+      <NewPage saveHandler={saveHandler} />
       <div className="divider"></div>
       <MainPage />
     </div>

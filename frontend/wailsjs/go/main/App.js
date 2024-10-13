@@ -6,8 +6,8 @@ export function FileOpen(arg1) {
   return window['go']['main']['App']['FileOpen'](arg1);
 }
 
-export function Greet(arg1) {
-  return window['go']['main']['App']['Greet'](arg1);
+export function FileSave(arg1) {
+  return window['go']['main']['App']['FileSave'](arg1);
 }
 
 export function MultiSelection() {

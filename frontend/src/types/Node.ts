@@ -1,6 +1,6 @@
-import { main } from "../../wailsjs/go/models";
+export type NodeId = { id: string } | { Id: string };
 
-export type Node = {
-  file: main.FileInfo;
+export type Node<T> = NodeId & {
+  nodeInfo: T;
   element: JSX.Element;
 };

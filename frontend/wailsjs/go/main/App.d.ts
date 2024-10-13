@@ -4,6 +4,6 @@ import {main} from '../models';
 
 export function FileOpen(arg1:string):Promise<void>;
 
-export function Greet(arg1:string):Promise<string>;
+export function FileSave(arg1:main.Notdir):Promise<void>;
 
 export function MultiSelection():Promise<Array<main.FileInfo>>;

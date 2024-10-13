@@ -29,11 +29,6 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
 type FileInfo struct {
 	Id      string
 	Name    string
@@ -95,4 +90,17 @@ func (a *App) FileOpen(filePath string) error {
 	err := cmd.Start()
 
 	return err
+}
+
+type Notdir struct {
+	Id     string
+	Name   string
+	Notdir []Notdir
+	Files  []FileInfo
+}
+
+func (a *App) FileSave(notdir Notdir) error {
+	fmt.Println(notdir)
+
+	return nil
 }
