@@ -66,8 +66,6 @@ func (a *App) MultiSelection() ([]FileInfo, error) {
 		files = append(files, customInfo)
 	}
 
-	fmt.Println(files)
-
 	return files, nil
 }
 
@@ -93,14 +91,19 @@ func (a *App) FileOpen(filePath string) error {
 }
 
 type Notdir struct {
-	Id     string
-	Name   string
-	Notdir []Notdir
-	Files  []FileInfo
+	Id    string
+	Name  string
+	Files []FileInfo
 }
 
-func (a *App) FileSave(notdir Notdir) error {
-	fmt.Println(notdir)
+type Page struct {
+	Name    string
+	Notdirs []Notdir
+	Files   []FileInfo
+}
+
+func (a *App) FileSave(page Page) error {
+	fmt.Println(page)
 
 	return nil
 }

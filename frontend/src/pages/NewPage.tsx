@@ -1,21 +1,19 @@
 import { useState, ChangeEvent } from "react";
 import DraggableItems from "../components/DraggableItems/DraggableItems";
-import NestedNotdirContainer from "../components/NestedNotdirContainer/NestedNotdirContainer";
+import NotdirContainer from "../components/NotdirContainer/NotdirContainer";
 
 import { main } from "../../wailsjs/go/models";
 import { useTempNotdirStore } from "../stores/useTempNotdirStore";
 import { Node } from "../types/Node";
-import { TempNotdir } from "../types/TempNotdir";
-import { NestedNotdir } from "../types/NestedNotdir";
 
 type NewPageProps = {
-  saveHandler: (notdir: TempNotdir<main.FileInfo>) => void;
+  saveHandler: (notdir: main.Page) => void;
 };
 
 export default function NewPage({ saveHandler }: NewPageProps) {
   const [name, setName] = useState("");
   const [newNotdirName, setNewNotdirName] = useState("");
-  const [nestedNotdirs, setNestedNotdirs] = useState<NestedNotdir[]>([]);
+  const [notdirs, setNotdirs] = useState<main.Notdir[]>([]);
 
   const { nodes, setNodes } = useTempNotdirStore();
 
@@ -28,21 +26,26 @@ export default function NewPage({ saveHandler }: NewPageProps) {
   }
 
   function onAddNotdir() {
-    const newNotdir = {
-      id: crypto.randomUUID(),
-      name: newNotdirName,
-      notdirs: [],
-      files: [],
-    };
-    setNestedNotdirs([...nestedNotdirs, newNotdir]);
+    const newNotdir = new main.Notdir({
+      Id: crypto.randomUUID(),
+      Name: newNotdirName,
+      Files: [],
+    });
+    setNotdirs([...notdirs, newNotdir]);
   }
 
   function onClickSave() {
-    saveHandler({ name, notdirs: nestedNotdirs, nodes });
+    saveHandler(
+      new main.Page({
+        Name: name,
+        Notdirs: notdirs,
+        Files: nodes.map((node) => node.nodeInfo),
+      })
+    );
   }
 
-  function setNestedNotdirsHandler(draggableItems: Node<NestedNotdir>[]) {
-    setNestedNotdirs(draggableItems.map((item) => item.nodeInfo));
+  function setNotdirsHandler(draggableItems: Node<main.Notdir>[]) {
+    setNotdirs(draggableItems.map((item) => item.nodeInfo));
   }
 
   return (
@@ -69,12 +72,12 @@ export default function NewPage({ saveHandler }: NewPageProps) {
       </div>
       <div>
         <DraggableItems
-          draggableItems={nestedNotdirs.map((nestedNotdir) => ({
-            id: nestedNotdir.id,
-            nodeInfo: nestedNotdir,
-            element: <NestedNotdirContainer nestedNotdir={nestedNotdir} />,
+          draggableItems={notdirs.map((notdir) => ({
+            id: notdir.Id,
+            nodeInfo: notdir,
+            element: <NotdirContainer notdir={notdir} />,
           }))}
-          setDraggableItems={setNestedNotdirsHandler}
+          setDraggableItems={setNotdirsHandler}
         />
       </div>
       <div>

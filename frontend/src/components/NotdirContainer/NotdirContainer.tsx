@@ -1,25 +1,18 @@
-import { Notdir } from "../../types/Notdir";
+import { main } from "../../../wailsjs/go/models";
 
 type NotdirContainerProps = {
-  notdir: Notdir;
+  notdir: main.Notdir;
 };
 
 export default function NotdirContainer({ notdir }: NotdirContainerProps) {
   return (
     <div>
       <div>
-        <span>{notdir.name}</span>
+        <span>{notdir.Name}</span>
       </div>
       <div>
         <ul>
-          {notdir.notdirs.map((nd) => (
-            <li key={nd.id}>{nd.name}</li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <ul>
-          {notdir.files.map((file) => (
+          {notdir.Files.map((file) => (
             <li key={file.Id}>{file.Name}</li>
           ))}
         </ul>

@@ -1,4 +1,4 @@
-import { MultiSelection, FileOpen } from "../wailsjs/go/main/App";
+import { MultiSelection, FileOpen, FileSave } from "../wailsjs/go/main/App";
 import { main } from "../wailsjs/go/models";
 
 import MainPage from "./pages/MainPage";
@@ -6,7 +6,7 @@ import NewPage from "./pages/NewPage";
 
 import { useTempNotdirStore } from "./stores/useTempNotdirStore";
 
-import { TempNotdir } from "./types/TempNotdir";
+import { Draft } from "./types/Draft";
 
 export default function App() {
   const { setNodes } = useTempNotdirStore();
@@ -26,8 +26,8 @@ export default function App() {
     await FileOpen(path);
   }
 
-  async function saveHandler(notdir: TempNotdir<main.FileInfo>) {
-    console.log(notdir);
+  async function saveHandler(draft: main.Page) {
+    FileSave(draft);
   }
 
   return (
