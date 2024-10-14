@@ -15,22 +15,6 @@ export default function App() {
   ]);
 
   return (
-    // <div id="App">
-    //   <p className="text-red-600">notdir</p>
-    //   <nav>
-    //     <ul>
-    //       <li>
-    //         <Link to="/">Main</Link>
-    //       </li>
-    //       <li>
-    //         <Link to="new">New</Link>
-    //       </li>
-    //     </ul>
-    //   </nav>
-    //   <main>
-    //     <RouterProvider router={router} />
-    //   </main>
-    // </div>
     <div id="App">
       <RouterProvider router={router} />
     </div>
