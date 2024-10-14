@@ -13,3 +13,7 @@ export function FileSave(arg1) {
 export function MultiSelection() {
   return window['go']['main']['App']['MultiSelection']();
 }
+
+export function NotdirFileOpen() {
+  return window['go']['main']['App']['NotdirFileOpen']();
+}

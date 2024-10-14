@@ -7,3 +7,5 @@ export function FileOpen(arg1:string):Promise<void>;
 export function FileSave(arg1:main.Page):Promise<void>;
 
 export function MultiSelection():Promise<Array<main.FileInfo>>;
+
+export function NotdirFileOpen():Promise<Array<number>>;

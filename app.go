@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -41,7 +42,6 @@ type FileInfo struct {
 
 func (a *App) MultiSelection() ([]FileInfo, error) {
 	paths, err := runtime.OpenMultipleFilesDialog(a.ctx, runtime.OpenDialogOptions{})
-
 	if err != nil {
 		return nil, fmt.Errorf("멀티 파일 선택 중 오류 발생: %v", err)
 	}
@@ -103,7 +103,31 @@ type Page struct {
 }
 
 func (a *App) FileSave(page Page) error {
-	fmt.Println(page)
+	jsonData, err := json.Marshal(page)
+	if err != nil {
+		fmt.Println("JSON 변환 중 오류 발생: ", err)
+		return err
+	}
+
+	err = os.WriteFile(fmt.Sprintf("%s.notdir", page.Name), jsonData, 0644)
+	if err != nil {
+		fmt.Println("파일 저장 중 오류 발생:", err)
+		return err
+	}
 
 	return nil
+}
+
+func (a *App) NotdirFileOpen() ([]byte, error) {
+	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("멀티 파일 선택 중 오류 발생: %v", err)
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("파일 읽기 오류 발생: %v", err)
+	}
+
+	return content, nil
 }

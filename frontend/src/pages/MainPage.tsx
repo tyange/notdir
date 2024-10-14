@@ -1,3 +1,9 @@
+import Layout from "../components/Layout/Layout";
+
 export default function MainPage() {
-  return <div></div>;
+  return (
+    <Layout>
+      <div>Main</div>
+    </Layout>
+  );
 }
