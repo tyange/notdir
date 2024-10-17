@@ -78,6 +78,7 @@ export namespace main {
 		}
 	}
 	export class Page {
+	    Id: string;
 	    Name: string;
 	    Notdirs: Notdir[];
 	    Files: FileInfo[];
@@ -88,6 +89,7 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Id = source["Id"];
 	        this.Name = source["Name"];
 	        this.Notdirs = this.convertValues(source["Notdirs"], Notdir);
 	        this.Files = this.convertValues(source["Files"], FileInfo);

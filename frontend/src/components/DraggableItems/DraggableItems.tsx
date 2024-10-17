@@ -52,7 +52,6 @@ export default function DraggableItems<T>({
       });
 
       if (draggedIndex === hoverIndex) {
-        console.log("draggedIndex === hoverIndex");
         return currentItems;
       }
 

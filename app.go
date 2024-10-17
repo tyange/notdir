@@ -97,6 +97,7 @@ type Notdir struct {
 }
 
 type Page struct {
+	Id      string
 	Name    string
 	Notdirs []Notdir
 	Files   []FileInfo
@@ -118,10 +119,10 @@ func (a *App) FileSave(page Page) error {
 	return nil
 }
 
-func (a *App) NotdirFileOpen() ([]byte, error) {
+func (a *App) NotdirFileOpen() (*Page, error) {
 	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("멀티 파일 선택 중 오류 발생: %v", err)
+		return nil, fmt.Errorf("파일 선택 중 오류 발생: %v", err)
 	}
 
 	content, err := os.ReadFile(path)
@@ -129,5 +130,12 @@ func (a *App) NotdirFileOpen() ([]byte, error) {
 		return nil, fmt.Errorf("파일 읽기 오류 발생: %v", err)
 	}
 
-	return content, nil
+	var page Page
+
+	err = json.Unmarshal(content, &page)
+	if err != nil {
+		return nil, fmt.Errorf("JSON 파싱 오류 발생: %v", err)
+	}
+
+	return &page, nil
 }

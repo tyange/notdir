@@ -2,10 +2,11 @@ import { useState, ChangeEvent } from "react";
 import DraggableItems from "../components/DraggableItems/DraggableItems";
 import NotdirContainer from "../components/NotdirContainer/NotdirContainer";
 import Layout from "../components/Layout/Layout";
+import Buttons from "../components/Buttons/Buttons";
 
 import { main } from "../../wailsjs/go/models";
 import { MultiSelection, FileSave } from "../../wailsjs/go/main/App";
-import { useTempNotdirStore } from "../stores/useTempNotdirStore";
+import { useTempPageStore } from "../stores/useTempPageStore";
 import { Node } from "../types/Node";
 
 export default function NewPage() {
@@ -13,7 +14,7 @@ export default function NewPage() {
   const [newNotdirName, setNewNotdirName] = useState("");
   const [notdirs, setNotdirs] = useState<main.Notdir[]>([]);
 
-  const { nodes, setNodes } = useTempNotdirStore();
+  const { nodes, setNodes } = useTempPageStore();
 
   async function selectFiles(): Promise<void> {
     const result = await MultiSelection();
@@ -43,9 +44,10 @@ export default function NewPage() {
     setNotdirs([...notdirs, newNotdir]);
   }
 
-  function onClickSave() {
+  function onSaveHandler() {
     FileSave(
       new main.Page({
+        Id: crypto.randomUUID(),
         Name: name,
         Notdirs: notdirs,
         Files: nodes.map((node) => node.nodeInfo),
@@ -57,16 +59,13 @@ export default function NewPage() {
     setNotdirs(draggableItems.map((item) => item.nodeInfo));
   }
 
+  const buttonsProps = {
+    buttons: [{ text: "save", handler: onSaveHandler }],
+  };
+
   return (
     <Layout>
-      <div>
-        <button className="btn btn-primary" onClick={selectFiles}>
-          Select Files
-        </button>
-        <button className="btn btn-secondary" onClick={onClickSave}>
-          Save
-        </button>
-      </div>
+      <Buttons {...buttonsProps} />
       <div>
         <label className="input input-bordered flex items-center gap-2">
           Page Name
