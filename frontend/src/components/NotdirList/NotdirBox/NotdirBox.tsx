@@ -6,7 +6,7 @@ type NotdirBox = {
 
 export default function NotdirBox({ notdir }: NotdirBox) {
   return (
-    <div className="h-40 bg-stone-100 rounded-xl flex justify-center items-center border border-stone-200 shadow-md hover:bg-stone-200 cursor-pointer">
+    <div className="h-20 bg-stone-100 rounded-xl flex justify-center items-center border border-stone-200 shadow-md hover:bg-stone-200 cursor-pointer">
       {notdir.Name}
     </div>
   );

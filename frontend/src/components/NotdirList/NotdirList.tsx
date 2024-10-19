@@ -1,4 +1,5 @@
 import { main } from "../../../wailsjs/go/models";
+
 import NotdirBox from "./NotdirBox/NotdirBox";
 
 type NotdirListProps = {
@@ -7,7 +8,7 @@ type NotdirListProps = {
 
 export default function NotdirList({ notdirs }: NotdirListProps) {
   return (
-    <ul className="grid grid-cols-3 gap-5">
+    <ul className="grid grid-cols-3 sm:grid-cols-[repeat(auto-fill,minmax(100px,100px))] gap-4">
       {notdirs.map((notdir) => (
         <li key={notdir.Id}>
           <NotdirBox notdir={notdir} />
