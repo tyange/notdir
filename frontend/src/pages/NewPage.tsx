@@ -78,9 +78,14 @@ export default function NewPage() {
           Notdir Name
           <input type="text" onChange={onChangeNotdirNameInput} />
         </label>
-        <button className="btn btn-accent" onClick={onAddNotdir}>
-          add notdir
-        </button>
+        <div className="join">
+          <button className="join-item btn" onClick={onAddNotdir}>
+            add notdir
+          </button>
+          <button className="join-item btn" onClick={selectFiles}>
+            select files
+          </button>
+        </div>
       </div>
       <div>
         <DraggableItems
