@@ -139,3 +139,12 @@ func (a *App) NotdirFileOpen() (*Page, error) {
 
 	return &page, nil
 }
+
+func (a *App) FileExists(path string) bool {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	return err == nil
+}
