@@ -1,13 +1,14 @@
 import { useState, ChangeEvent } from "react";
-import DraggableItems from "../components/DraggableItems/DraggableItems";
-import NotdirContainer from "../components/NotdirContainer/NotdirContainer";
-import Layout from "../components/Layout/Layout";
-import Buttons from "../components/Buttons/Buttons";
 
 import { main } from "../../wailsjs/go/models";
 import { MultiSelection, FileSave } from "../../wailsjs/go/main/App";
-import { useTempPageStore } from "../stores/useTempPageStore";
 import { Node } from "../types/Node";
+import { useTempPageStore } from "../stores/useTempPageStore";
+
+import DraggableItems from "../components/DraggableItems/DraggableItems";
+import NotdirBox from "../components/NotdirBox/NotdirBox";
+import Layout from "../components/Layout/Layout";
+import Buttons, { ButtonsProps } from "../components/Buttons/Buttons";
 
 export default function NewPage() {
   const [name, setName] = useState("");
@@ -59,8 +60,8 @@ export default function NewPage() {
     setNotdirs(draggableItems.map((item) => item.nodeInfo));
   }
 
-  const buttonsProps = {
-    buttons: [{ text: "save", handler: onSaveHandler }],
+  const buttonsProps: ButtonsProps = {
+    buttons: [{ text: "save", handler: onSaveHandler, enabled: true }],
   };
 
   return (
@@ -86,7 +87,7 @@ export default function NewPage() {
           draggableItems={notdirs.map((notdir) => ({
             id: notdir.Id,
             nodeInfo: notdir,
-            element: <NotdirContainer notdir={notdir} />,
+            element: <NotdirBox notdir={notdir} />,
           }))}
           setDraggableItems={setNotdirsHandler}
         />
