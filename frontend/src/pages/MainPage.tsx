@@ -34,7 +34,7 @@ export default function MainPage() {
       {
         text: "open",
         handler: notdirFileOpen,
-        enabled: true,
+        enabled: !selectedPage,
       },
     ],
   };
