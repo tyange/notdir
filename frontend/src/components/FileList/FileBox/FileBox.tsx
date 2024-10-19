@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { main } from "../../../../wailsjs/go/models";
-import { FileExists } from "../../../../wailsjs/go/main/App";
+import { FileExists, FileOpen } from "../../../../wailsjs/go/main/App";
 
 type FileBoxProps = {
   file: main.FileInfo;
@@ -9,6 +9,10 @@ type FileBoxProps = {
 
 export default function FileBox({ file }: FileBoxProps) {
   const [isFileExists, setIsFileExists] = useState(false);
+
+  const onDoubleClickHandler = async (path: string) => {
+    await FileOpen(path);
+  };
 
   useEffect(() => {
     async function checkFileExists() {
@@ -26,7 +30,10 @@ export default function FileBox({ file }: FileBoxProps) {
   }, [file]);
 
   return (
-    <div className="shadow-sm rounded-lg w-full p-3 border border-gray-300 flex items-center gap-2">
+    <div
+      className="shadow-sm active:shadow-md rounded-lg w-full p-3 border border-gray-300 active:border-gray-400 hover:bg-gray-100 flex items-center gap-2"
+      onDoubleClick={() => onDoubleClickHandler(file.Path)}
+    >
       {!isFileExists && (
         <span>
           <svg

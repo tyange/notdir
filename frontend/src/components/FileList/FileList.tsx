@@ -7,7 +7,7 @@ type FileListProps = {
 
 export default function FileList({ files }: FileListProps) {
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-3 select-none">
       {files.map((file) => (
         <li key={file.Id}>
           <FileBox file={file} />
