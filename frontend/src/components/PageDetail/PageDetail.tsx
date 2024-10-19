@@ -1,5 +1,5 @@
 import { main } from "../../../wailsjs/go/models";
-import NotdirList from "./NotdirList/NotdirList";
+import NotdirList from "../NotdirList/NotdirList";
 
 type PageDetailProps = {
   page: main.Page;

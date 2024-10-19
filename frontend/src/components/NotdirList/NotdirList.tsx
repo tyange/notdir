@@ -1,5 +1,5 @@
-import { main } from "../../../../wailsjs/go/models";
-import NotdirBox from "../../NotdirBox/NotdirBox";
+import { main } from "../../../wailsjs/go/models";
+import NotdirBox from "./NotdirBox/NotdirBox";
 
 type NotdirListProps = {
   notdirs: main.Notdir[];

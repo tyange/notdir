@@ -6,7 +6,7 @@ import { Node } from "../types/Node";
 import { useTempPageStore } from "../stores/useTempPageStore";
 
 import DraggableItems from "../components/DraggableItems/DraggableItems";
-import NotdirBox from "../components/NotdirBox/NotdirBox";
+import NotdirBox from "../components/NotdirList/NotdirBox/NotdirBox";
 import Layout from "../components/Layout/Layout";
 import Buttons, { ButtonsProps } from "../components/Buttons/Buttons";
 

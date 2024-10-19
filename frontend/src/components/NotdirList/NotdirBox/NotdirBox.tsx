@@ -1,4 +1,4 @@
-import { main } from "../../../wailsjs/go/models";
+import { main } from "../../../../wailsjs/go/models";
 
 type NotdirBox = {
   notdir: main.Notdir;
