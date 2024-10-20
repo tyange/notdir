@@ -8,8 +8,6 @@ type PageDetailProps = {
 };
 
 export default function PageDetail({ page }: PageDetailProps) {
-  console.log(navigator.userAgent);
-
   return (
     <div className="w-full h-full flex flex-col gap-10">
       {page.Notdirs.length > 0 && <NotdirList initialNotdir={page.Notdirs} />}
