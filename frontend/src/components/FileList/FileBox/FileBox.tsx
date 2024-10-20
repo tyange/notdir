@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { match } from "ts-pattern";
+import classNames from "classnames";
 
 import { main } from "../../../../wailsjs/go/models";
 import { FileExists, FileOpen } from "../../../../wailsjs/go/main/App";
 
 type FileBoxProps = {
   file: main.FileInfo;
+  isDragging: boolean;
 };
 
 type FileBoxState =
@@ -14,7 +16,7 @@ type FileBoxState =
   | { status: "success" }
   | { status: "error"; error: string };
 
-export default function FileBox({ file }: FileBoxProps) {
+export default function FileBox({ file, isDragging }: FileBoxProps) {
   const [state, setState] = useState<FileBoxState>({ status: "idle" });
 
   const isDisabled = state.status !== "success";
@@ -45,25 +47,33 @@ export default function FileBox({ file }: FileBoxProps) {
     checkFileExists();
   }, [file]);
 
-  const baseClasses =
-    "shadow-sm rounded-lg w-full p-3 border transition-all duration-200";
-  const stateClasses = isDisabled
-    ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
-    : "border-gray-300 active:border-gray-400 hover:bg-gray-100 cursor-pointer";
+  const baseClasses = classNames(
+    "shadow-sm",
+    "rounded-lg",
+    "w-full",
+    "p-3",
+    "border",
+    {
+      "border-gray-200 text-gray-400 cursor-not-allowed": isDisabled,
+      "border-gray-300": !isDisabled,
+      "bg-gray-100": isDragging,
+      "bg-gray-50": isDisabled && !isDragging,
+    }
+  );
 
   return match(state)
     .with({ status: "idle" }, () => (
-      <div className={`${baseClasses} ${stateClasses}`}>Initializing...</div>
+      <div className={baseClasses}>Initializing...</div>
     ))
     .with({ status: "loading" }, () => (
-      <div className={`${baseClasses} ${stateClasses} flex items-center`}>
+      <div className={classNames(baseClasses, "flex items-center")}>
         <span className="loading loading-spinner loading-md mr-2"></span>
         <span>Checking file...</span>
       </div>
     ))
     .with({ status: "success" }, () => (
       <div
-        className={`${baseClasses} ${stateClasses}`}
+        className={baseClasses}
         onDoubleClick={() => onDoubleClickHandler(file.Path)}
       >
         <span className="flex-1">{file.Name}</span>
@@ -71,7 +81,10 @@ export default function FileBox({ file }: FileBoxProps) {
     ))
     .with({ status: "error" }, ({ error }) => (
       <div
-        className={`${baseClasses} ${stateClasses} border-red-300 bg-red-50 text-red-600`}
+        className={classNames(
+          baseClasses,
+          "border-red-300 bg-red-50 text-red-600"
+        )}
       >
         Error: {error}
       </div>

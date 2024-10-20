@@ -1,19 +1,28 @@
+import { useState } from "react";
+
 import { main } from "../../../wailsjs/go/models";
 
+import DraggableItems from "../DraggableItems/DraggableItems";
 import NotdirBox from "./NotdirBox/NotdirBox";
 
 type NotdirListProps = {
-  notdirs: main.Notdir[];
+  initialNotdir: main.Notdir[];
 };
 
-export default function NotdirList({ notdirs }: NotdirListProps) {
+export default function NotdirList({ initialNotdir }: NotdirListProps) {
+  const [notdirs, setNotdirs] = useState(initialNotdir);
+
+  const renderItem = (notdir: main.Notdir, isDragging: boolean) => {
+    return <NotdirBox notdir={notdir} isDragging={isDragging} />;
+  };
+
   return (
     <ul className="grid grid-cols-3 sm:grid-cols-[repeat(auto-fill,minmax(100px,100px))] gap-4">
-      {notdirs.map((notdir) => (
-        <li key={notdir.Id}>
-          <NotdirBox notdir={notdir} />
-        </li>
-      ))}
+      <DraggableItems<main.Notdir>
+        draggableItems={notdirs}
+        setDraggableItems={setNotdirs}
+        renderItem={renderItem}
+      />
     </ul>
   );
 }

@@ -1,27 +1,23 @@
-import { useState, DragEvent, CSSProperties, useCallback } from "react";
+import { useState, DragEvent, useCallback, Dispatch } from "react";
 
-import { Node } from "../../types/Node";
-
-type DraggableItemsProps<T> = {
-  draggableItems: Node<T>[];
-  setDraggableItems: (draggableItems: Node<T>[]) => void;
-  draggingNodeClassName?: string;
-  draggingNodeStyles?: CSSProperties;
+type WithId = {
+  Id: string;
 };
 
-export default function DraggableItems<T>({
+type DraggableItemsProps<T extends WithId> = {
+  draggableItems: T[];
+  setDraggableItems: Dispatch<React.SetStateAction<T[]>>;
+  renderItem: (item: T, isDragging: boolean) => React.ReactNode;
+};
+
+export default function DraggableItems<T extends WithId>({
   draggableItems,
   setDraggableItems,
-  draggingNodeClassName,
-  draggingNodeStyles,
+  renderItem,
 }: DraggableItemsProps<T>) {
   const [isDragging, setIsDragging] = useState(false);
   const [currentDraggingNode, setCurrentDraggingNode] =
     useState<null | HTMLElement>();
-
-  function getId(item: Node<any>): string {
-    return "id" in item ? item.id : item.Id;
-  }
 
   const dragStart = useCallback((e: DragEvent) => {
     setIsDragging(true);
@@ -45,10 +41,10 @@ export default function DraggableItems<T>({
       const currentItems = [...draggableItems];
 
       const draggedIndex = currentItems.findIndex((item) => {
-        return getId(item) === currentDraggingNode.id;
+        return item.Id === currentDraggingNode.id;
       });
       const hoverIndex = currentItems.findIndex((item) => {
-        return getId(item) === currentTarget.id;
+        return item.Id === currentTarget.id;
       });
 
       if (draggedIndex === hoverIndex) {
@@ -69,47 +65,28 @@ export default function DraggableItems<T>({
     setCurrentDraggingNode(null);
   }, []);
 
-  function getNodeClassName(node: Node<T>) {
-    if (
-      isDragging &&
-      currentDraggingNode &&
-      draggingNodeClassName &&
-      getId(node) === currentDraggingNode.id
-    ) {
-      return [node.element.props.className, draggingNodeClassName].join(" ");
-    }
-
-    return node.element.props.className;
-  }
-
-  function getStyles(key: string) {
-    if (
-      isDragging &&
-      currentDraggingNode &&
-      key === currentDraggingNode.id &&
-      draggingNodeStyles
-    ) {
-      return { ...draggingNodeStyles };
-    }
-  }
-
   return (
-    <ul>
-      {draggableItems.map((draggableNode) => (
+    <>
+      {draggableItems.map((item) => (
         <li
-          id={getId(draggableNode)}
-          key={getId(draggableNode)}
+          id={item.Id}
+          key={item.Id}
           draggable
-          className={getNodeClassName(draggableNode)}
           onDragStart={dragStart}
           onDragEnter={dragEnter}
           onDragOver={dragOver}
           onDragEnd={dragEnd}
-          style={getStyles(getId(draggableNode))}
         >
-          {draggableNode.element}
+          {renderItem(
+            item,
+            Boolean(
+              isDragging &&
+                currentDraggingNode &&
+                currentDraggingNode.id === item.Id
+            )
+          )}
         </li>
       ))}
-    </ul>
+    </>
   );
 }

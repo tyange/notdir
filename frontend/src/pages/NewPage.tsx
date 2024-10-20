@@ -5,8 +5,8 @@ import { MultiSelection, FileSave } from "../../wailsjs/go/main/App";
 import { Node } from "../types/Node";
 import { useTempPageStore } from "../stores/useTempPageStore";
 
-import DraggableItems from "../components/DraggableItems/DraggableItems";
-import NotdirBox from "../components/NotdirList/NotdirBox/NotdirBox";
+// import DraggableItems from "../components/DraggableItems/DraggableItems";
+// import NotdirBox from "../components/NotdirList/NotdirBox/NotdirBox";
 import Layout from "../components/Layout/Layout";
 import Buttons, { ButtonsProps } from "../components/Buttons/Buttons";
 
@@ -87,7 +87,7 @@ export default function NewPage() {
           </button>
         </div>
       </div>
-      <div>
+      {/* <div>
         <DraggableItems
           draggableItems={notdirs.map((notdir) => ({
             id: notdir.Id,
@@ -103,7 +103,7 @@ export default function NewPage() {
           setDraggableItems={setNodes}
           draggingNodeClassName="bg-red-600"
         />
-      </div>
+      </div> */}
     </Layout>
   );
 }
