@@ -7,9 +7,9 @@ import { usePagesStore } from "../stores/usePagesStore";
 
 import Layout from "../components/Layout/Layout";
 import Buttons, { ButtonsProps } from "../components/Buttons/Buttons";
-import PagesContainer from "../components/PagesContainer/PagesContainer";
-import PageBox from "../components/PageBox/PageBox";
-import PageDetail from "../components/PageDetail/PageDetail";
+import NotdirsContainer from "../components/NotdirsContainer/NotdirsContainer";
+import NotdirBox from "../components/NotdirBox/NotdirBox";
+import NotdirDetail from "../components/NotdirDetail/NotdirDetail";
 
 export default function MainPage() {
   const { pages, addPage } = usePagesStore();
@@ -48,15 +48,17 @@ export default function MainPage() {
       <Buttons {...buttonsProps} />
       <div className="flex-1 relative">
         {!selectedPage && (
-          <PagesContainer>
+          <NotdirsContainer>
             {pages.map((page) => (
               <li key={page.Id} onClick={() => onClickPageHandler(page)}>
-                <PageBox page={page} />
+                <NotdirBox page={page} />
               </li>
             ))}
-          </PagesContainer>
+          </NotdirsContainer>
         )}
-        {selectedPage && <PageDetail page={selectedPage} />}
+        {selectedPage && (
+          <NotdirDetail page={selectedPage} setSelectedPage={setSelectedPage} />
+        )}
       </div>
     </Layout>
   );

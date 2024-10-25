@@ -6,7 +6,7 @@ type WithId = {
 
 type DraggableItemsProps<T extends WithId> = {
   draggableItems: T[];
-  setDraggableItems: Dispatch<React.SetStateAction<T[]>>;
+  setDraggableItems: (updatedItems: T[]) => void;
   renderItem: (item: T, isDragging: boolean) => React.ReactNode;
 };
 

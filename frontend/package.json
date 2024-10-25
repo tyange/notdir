@@ -13,6 +13,8 @@
     "classnames": "^2.5.1",
     "daisyui": "^4.12.13",
     "immer": "^10.1.1",
+    "mobx": "^6.13.5",
+    "mobx-react-lite": "^4.0.7",
     "postcss": "^8.4.47",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
