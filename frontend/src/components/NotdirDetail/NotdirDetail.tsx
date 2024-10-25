@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 
 import { main } from "../../../wailsjs/go/models";
 
-import NotdirList from "../NotdirList/NotdirList";
+import AtomdirList from "../AtomdirList/AtomdirList";
 import FileList from "../FileList/FileList";
 
 type NotdirDetailProps = {
@@ -28,7 +28,7 @@ export default function NotdirDetail({
   return (
     <div className="w-full h-full flex flex-col gap-10">
       {page.Notdirs.length > 0 && (
-        <NotdirList notdirs={notdirs} setNotdirs={handleNotdirsUpdate} />
+        <AtomdirList notdirs={notdirs} setNotdirs={handleNotdirsUpdate} />
       )}
       {page.Files.length > 0 && (
         <FileList files={files} setFiles={handleFilesUpdate} />

@@ -1,18 +1,16 @@
-import { Dispatch, SetStateAction } from "react";
-
 import { main } from "../../../wailsjs/go/models";
 
 import DraggableItems from "../DraggableItems/DraggableItems";
-import NotdirBox from "./NotdirBox/NotdirBox";
+import AtomdirBox from "./AtomdirBox/AtomdirBox";
 
-type NotdirListProps = {
+type AtomdirListProps = {
   notdirs: main.Notdir[];
   setNotdirs: (updatedNotdirs: main.Notdir[]) => void;
 };
 
-export default function NotdirList({ notdirs, setNotdirs }: NotdirListProps) {
+export default function AtomdirList({ notdirs, setNotdirs }: AtomdirListProps) {
   const renderItem = (notdir: main.Notdir, isDragging: boolean) => {
-    return <NotdirBox notdir={notdir} isDragging={isDragging} />;
+    return <AtomdirBox notdir={notdir} isDragging={isDragging} />;
   };
 
   return (

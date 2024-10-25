@@ -1,12 +1,12 @@
 import classNames from "classnames";
 import { main } from "../../../../wailsjs/go/models";
 
-type NotdirBox = {
+type AtomdirBox = {
   notdir: main.Notdir;
   isDragging: boolean;
 };
 
-export default function NotdirBox({ notdir, isDragging }: NotdirBox) {
+export default function AtomdirBox({ notdir, isDragging }: AtomdirBox) {
   const customClassName = classNames(
     "h-20",
     "rounded-xl",
