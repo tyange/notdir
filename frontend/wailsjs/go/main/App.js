@@ -14,6 +14,10 @@ export function FileSave(arg1) {
   return window['go']['main']['App']['FileSave'](arg1);
 }
 
+export function FileSaveWithDialog(arg1) {
+  return window['go']['main']['App']['FileSaveWithDialog'](arg1);
+}
+
 export function MultiSelection() {
   return window['go']['main']['App']['MultiSelection']();
 }

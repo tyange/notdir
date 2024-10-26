@@ -83,6 +83,7 @@ export namespace main {
 	    Name: string;
 	    Atomdirs: Atomdir[];
 	    Files: FileInfo[];
+	    Path: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Notdir(source);
@@ -94,6 +95,7 @@ export namespace main {
 	        this.Name = source["Name"];
 	        this.Atomdirs = this.convertValues(source["Atomdirs"], Atomdir);
 	        this.Files = this.convertValues(source["Files"], FileInfo);
+	        this.Path = source["Path"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

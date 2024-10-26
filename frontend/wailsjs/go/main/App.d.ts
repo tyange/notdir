@@ -8,6 +8,8 @@ export function FileOpen(arg1:string):Promise<void>;
 
 export function FileSave(arg1:main.Notdir):Promise<void>;
 
+export function FileSaveWithDialog(arg1:main.Notdir):Promise<void>;
+
 export function MultiSelection():Promise<Array<main.FileInfo>>;
 
 export function NotdirFileOpen():Promise<main.Notdir>;

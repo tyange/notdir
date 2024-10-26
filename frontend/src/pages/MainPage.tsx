@@ -2,7 +2,7 @@ import { useState } from "react";
 import { observer } from "mobx-react-lite";
 
 import { main } from "../../wailsjs/go/models";
-import { NotdirFileOpen } from "../../wailsjs/go/main/App";
+import { FileSave, NotdirFileOpen } from "../../wailsjs/go/main/App";
 
 import { notdirsStore } from "../stores/NodirsStore";
 import { notdirDetailStore } from "../stores/NotdirDetailStore";
@@ -32,6 +32,15 @@ const MainPage = observer(() => {
       notdirDetailStore.files
     );
     notdirDetailStore.syncWithUpdate();
+
+    const notdir = notdirsStore.getNotdirById(
+      notdirDetailStore.currentNotdirId
+    );
+    if (!notdir) {
+      alert("파일로 저장할 Notdir를 찾지 못했습니다.");
+      return;
+    }
+    FileSave(notdir);
   };
 
   const buttonsProps: ButtonsProps = {

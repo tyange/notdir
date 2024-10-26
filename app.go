@@ -101,6 +101,7 @@ type Notdir struct {
 	Name     string
 	Atomdirs []Atomdir
 	Files    []FileInfo
+	Path     string
 }
 
 func (a *App) FileSave(notdir Notdir) error {
@@ -110,7 +111,54 @@ func (a *App) FileSave(notdir Notdir) error {
 		return err
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s.notdir", notdir.Name), jsonData, 0644)
+	err = os.WriteFile(notdir.Path, jsonData, 0644)
+	if err != nil {
+		fmt.Println("파일 저장 중 오류 발생:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) FileSaveWithDialog(notdir Notdir) error {
+	// 파일 저장 다이얼로그 열기
+	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		DefaultFilename: fmt.Sprintf("%s.notdir", notdir.Name), // 기본 파일명 설정
+		Title:           "Notdir 파일 저장",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "Notdir Files (*.notdir)",
+				Pattern:     "*.notdir",
+			},
+			{
+				DisplayName: "All Files (*.*)",
+				Pattern:     "*.*",
+			},
+		},
+	})
+
+	if err != nil {
+		fmt.Println("파일 다이얼로그 오류:", err)
+		return err
+	}
+
+	// 사용자가 취소한 경우
+	if filePath == "" {
+		return nil
+	}
+
+	// filePath를 notdir에 등록
+	notdir.Path = filePath
+
+	// JSON 데이터로 변환
+	jsonData, err := json.Marshal(notdir)
+	if err != nil {
+		fmt.Println("JSON 변환 중 오류 발생: ", err)
+		return err
+	}
+
+	// 선택한 위치에 파일 저장
+	err = os.WriteFile(filePath, jsonData, 0644)
 	if err != nil {
 		fmt.Println("파일 저장 중 오류 발생:", err)
 		return err

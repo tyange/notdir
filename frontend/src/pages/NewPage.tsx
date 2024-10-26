@@ -1,7 +1,7 @@
 import { useState, ChangeEvent } from "react";
 
 import { main } from "../../wailsjs/go/models";
-import { MultiSelection, FileSave } from "../../wailsjs/go/main/App";
+import { MultiSelection, FileSaveWithDialog } from "../../wailsjs/go/main/App";
 
 import Layout from "../components/Layout/Layout";
 import Buttons, { ButtonsProps } from "../components/Buttons/Buttons";
@@ -39,12 +39,13 @@ export default function NewPage() {
   };
 
   const onSaveHandler = () => {
-    FileSave(
+    FileSaveWithDialog(
       new main.Notdir({
         Id: crypto.randomUUID(),
         Name: name,
         Atomdirs: atomdirs,
         Files: files,
+        Path: "",
       })
     );
   };
