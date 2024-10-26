@@ -35,8 +35,6 @@ export default function NewPage() {
       Files: [],
     });
 
-    console.log(newAtomdir);
-
     setAtomdirs([...atomdirs, newAtomdir]);
   };
 
