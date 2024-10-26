@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
 
-import { main } from "../../wailsjs/go/models";
-import { FileSave, NotdirFileOpen } from "../../wailsjs/go/main/App";
+import { frontend, main } from "../../wailsjs/go/models";
+import {
+  FileSave,
+  NotdirFileOpen,
+  ShowMessageDialog,
+} from "../../wailsjs/go/main/App";
 
 import { notdirsStore } from "../stores/NodirsStore";
 import { notdirDetailStore } from "../stores/NotdirDetailStore";
@@ -18,6 +22,18 @@ const MainPage = observer(() => {
 
   const notdirFileOpen = async () => {
     const result = await NotdirFileOpen();
+
+    if (notdirsStore.notdirs.some((n) => n.Id === result.Id)) {
+      ShowMessageDialog(
+        new frontend.MessageDialogOptions({
+          Type: "warning",
+          Message: "해당 Notdir가 이미 열려 있습니다.",
+          Buttons: ["Ok"],
+        })
+      );
+      return;
+    }
+
     notdirsStore.addNotdir(result);
   };
 
@@ -37,7 +53,13 @@ const MainPage = observer(() => {
       notdirDetailStore.currentNotdirId
     );
     if (!notdir) {
-      alert("파일로 저장할 Notdir를 찾지 못했습니다.");
+      ShowMessageDialog(
+        new frontend.MessageDialogOptions({
+          Type: "warning",
+          Message: "파일로 저장할 Notdir를 찾지 못했습니다.",
+          Buttons: ["Ok"],
+        })
+      );
       return;
     }
     FileSave(notdir);

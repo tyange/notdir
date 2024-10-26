@@ -30,6 +30,15 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
+func (a *App) ShowMessageDialog(options runtime.MessageDialogOptions) (*string, error) {
+	selection, err := runtime.MessageDialog(a.ctx, options)
+	if err != nil {
+		return nil, fmt.Errorf("MessageDialog 선택 중 오류 발생: %v", err)
+	}
+
+	return &selection, nil
+}
+
 type FileInfo struct {
 	Id      string
 	Name    string

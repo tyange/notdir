@@ -25,3 +25,7 @@ export function MultiSelection() {
 export function NotdirFileOpen() {
   return window['go']['main']['App']['NotdirFileOpen']();
 }
+
+export function ShowMessageDialog(arg1) {
+  return window['go']['main']['App']['ShowMessageDialog'](arg1);
+}

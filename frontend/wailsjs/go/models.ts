@@ -1,3 +1,32 @@
+export namespace frontend {
+	
+	export class MessageDialogOptions {
+	    Type: string;
+	    Title: string;
+	    Message: string;
+	    Buttons: string[];
+	    DefaultButton: string;
+	    CancelButton: string;
+	    Icon: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new MessageDialogOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Type = source["Type"];
+	        this.Title = source["Title"];
+	        this.Message = source["Message"];
+	        this.Buttons = source["Buttons"];
+	        this.DefaultButton = source["DefaultButton"];
+	        this.CancelButton = source["CancelButton"];
+	        this.Icon = source["Icon"];
+	    }
+	}
+
+}
+
 export namespace main {
 	
 	export class FileInfo {
