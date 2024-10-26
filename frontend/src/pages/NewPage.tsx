@@ -66,7 +66,9 @@ export default function NewPage() {
   );
 
   const buttonsProps: ButtonsProps = {
-    buttons: [{ text: "save", handler: onSaveHandler, enabled: true }],
+    buttons: [
+      { text: "save", handler: onSaveHandler, enabled: true, disabled: false },
+    ],
   };
 
   return (

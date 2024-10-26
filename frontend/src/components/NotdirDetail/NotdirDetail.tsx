@@ -1,34 +1,37 @@
-import { useState } from "react";
+import { observer } from "mobx-react-lite";
 
 import { main } from "../../../wailsjs/go/models";
+
+import { notdirDetailStore } from "../../stores/NotdirDetailStore";
 
 import AtomdirList from "../AtomdirList/AtomdirList";
 import FileList from "../FileList/FileList";
 
-type NotdirDetailProps = {
-  notdir: main.Notdir;
-};
-
-export default function NotdirDetail({ notdir }: NotdirDetailProps) {
-  const [atomdirs, setAtomdirs] = useState(notdir.Atomdirs);
-  const [files, setFiles] = useState(notdir.Files);
-
-  const handleAtomdirsUpdate = (updatedNotdirs: main.Atomdir[]) => {
-    setAtomdirs(updatedNotdirs);
+const NotdirDetail = observer(() => {
+  const handleAtomdirsUpdate = (updatedAtomdirs: main.Atomdir[]) => {
+    notdirDetailStore.updateAtomdirs(updatedAtomdirs);
   };
 
   const handleFilesUpdate = (updatedFiles: main.FileInfo[]) => {
-    setFiles(updatedFiles);
+    notdirDetailStore.updateFiles(updatedFiles);
   };
 
   return (
     <div className="w-full h-full flex flex-col gap-10">
-      {notdir.Atomdirs.length > 0 && (
-        <AtomdirList atomdirs={atomdirs} setAtomdirs={handleAtomdirsUpdate} />
+      {notdirDetailStore.atomdirs.length > 0 && (
+        <AtomdirList
+          atomdirs={notdirDetailStore.atomdirs}
+          setAtomdirs={handleAtomdirsUpdate}
+        />
       )}
-      {notdir.Files.length > 0 && (
-        <FileList files={files} setFiles={handleFilesUpdate} />
+      {notdirDetailStore.files.length > 0 && (
+        <FileList
+          files={notdirDetailStore.files}
+          setFiles={handleFilesUpdate}
+        />
       )}
     </div>
   );
-}
+});
+
+export default NotdirDetail;

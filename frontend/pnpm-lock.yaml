@@ -17,6 +17,9 @@ importers:
       daisyui:
         specifier: ^4.12.13
         version: 4.12.13(postcss@8.4.47)
+      es-toolkit:
+        specifier: ^1.26.1
+        version: 1.26.1
       immer:
         specifier: ^10.1.1
         version: 10.1.1
@@ -594,6 +597,9 @@ packages:
 
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
+
+  es-toolkit@1.26.1:
+    resolution: {integrity: sha512-E3H14lHWk8JpupVpIRA1gfNF4r953abHTFW+X1Rp7zl7eG37ksuthfEA4FinyVF/Y807vzzfQS1nubeZk2LTVA==}
 
   esbuild@0.21.5:
     resolution: {integrity: sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==}
@@ -1558,6 +1564,8 @@ snapshots:
   emoji-regex@8.0.0: {}
 
   emoji-regex@9.2.2: {}
+
+  es-toolkit@1.26.1: {}
 
   esbuild@0.21.5:
     optionalDependencies:

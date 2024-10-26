@@ -5,6 +5,7 @@ import { main } from "../../wailsjs/go/models";
 import { NotdirFileOpen } from "../../wailsjs/go/main/App";
 
 import { notdirsStore } from "../stores/NodirsStore";
+import { notdirDetailStore } from "../stores/NotdirDetailStore";
 
 import Layout from "../components/Layout/Layout";
 import Buttons, { ButtonsProps } from "../components/Buttons/Buttons";
@@ -13,9 +14,7 @@ import NotdirBox from "../components/NotdirBox/NotdirBox";
 import NotdirDetail from "../components/NotdirDetail/NotdirDetail";
 
 const MainPage = observer(() => {
-  const [selectedNotdir, setSelectedNotdir] = useState<main.Notdir | null>(
-    null
-  );
+  const [hasNotdir, setHasNotdir] = useState(false);
 
   const notdirFileOpen = async () => {
     const result = await NotdirFileOpen();
@@ -23,7 +22,15 @@ const MainPage = observer(() => {
   };
 
   const backToList = () => {
-    setSelectedNotdir(null);
+    setHasNotdir(false);
+  };
+
+  const handleSave = () => {
+    notdirsStore.updateNotdir(
+      notdirDetailStore.currentNotdirId,
+      notdirDetailStore.atomdirs,
+      notdirDetailStore.files
+    );
   };
 
   const buttonsProps: ButtonsProps = {
@@ -31,34 +38,45 @@ const MainPage = observer(() => {
       {
         text: "back",
         handler: backToList,
-        enabled: !!selectedNotdir,
+        enabled: !!hasNotdir,
+        disabled: false,
+      },
+      {
+        text: "save",
+        handler: handleSave,
+        enabled: !!hasNotdir,
+        disabled: !notdirDetailStore.hasAnyChanges,
       },
       {
         text: "open",
         handler: notdirFileOpen,
-        enabled: !selectedNotdir,
+        enabled: !hasNotdir,
+        disabled: false,
       },
     ],
   };
 
-  const onClickPageHandler = (page: main.Notdir) => {
-    setSelectedNotdir(page);
+  const onClickNotdirHandler = (notdir: main.Notdir) => {
+    setHasNotdir(true);
+    notdirDetailStore.setCurrentNotdirId(notdir);
+    notdirDetailStore.setCurrentAtomdirs(notdir);
+    notdirDetailStore.setCurrentFiles(notdir);
   };
 
   return (
     <Layout>
       <Buttons {...buttonsProps} />
       <div className="flex-1 relative">
-        {!selectedNotdir && (
+        {!hasNotdir && (
           <NotdirsContainer>
-            {notdirsStore.notdirs.map((page) => (
-              <li key={page.Id} onClick={() => onClickPageHandler(page)}>
-                <NotdirBox page={page} />
+            {notdirsStore.notdirs.map((notdir) => (
+              <li key={notdir.Id} onClick={() => onClickNotdirHandler(notdir)}>
+                <NotdirBox page={notdir} />
               </li>
             ))}
           </NotdirsContainer>
         )}
-        {selectedNotdir && <NotdirDetail notdir={selectedNotdir} />}
+        {hasNotdir && <NotdirDetail />}
       </div>
     </Layout>
   );

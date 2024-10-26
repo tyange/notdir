@@ -1,8 +1,21 @@
+import classNames from "classnames";
+
+type ButtonProps = {
+  text: string;
+  handler: () => void;
+  enabled: boolean;
+  disabled: boolean;
+};
+
 export type ButtonsProps = {
-  buttons: { text: string; handler: () => void; enabled: boolean }[];
+  buttons: ButtonProps[];
 };
 
 export default function Buttons({ buttons }: ButtonsProps) {
+  const buttonClassName = (props: ButtonProps) => {
+    return classNames("btn", "join-item", { "btn-disabled": props.disabled });
+  };
+
   return (
     <div className="join flex-1 flex p-5 absolute -top-20 -left-5">
       {buttons
@@ -10,7 +23,7 @@ export default function Buttons({ buttons }: ButtonsProps) {
         .map((button) => (
           <button
             key={button.text}
-            className="btn join-item"
+            className={buttonClassName(button)}
             onClick={button.handler}
           >
             {button.text}
