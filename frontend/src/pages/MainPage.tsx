@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { observer } from "mobx-react-lite";
 
 import { main } from "../../wailsjs/go/models";
 import { NotdirFileOpen } from "../../wailsjs/go/main/App";
 
-import { usePagesStore } from "../stores/usePagesStore";
+import { notdirsStore } from "../stores/NodirsStore";
 
 import Layout from "../components/Layout/Layout";
 import Buttons, { ButtonsProps } from "../components/Buttons/Buttons";
@@ -11,13 +12,12 @@ import NotdirsContainer from "../components/NotdirsContainer/NotdirsContainer";
 import NotdirBox from "../components/NotdirBox/NotdirBox";
 import NotdirDetail from "../components/NotdirDetail/NotdirDetail";
 
-export default function MainPage() {
-  const { pages, addPage } = usePagesStore();
+const MainPage = observer(() => {
   const [selectedPage, setSelectedPage] = useState<main.Page | null>(null);
 
   const notdirFileOpen = async () => {
     const result = await NotdirFileOpen();
-    addPage(result);
+    notdirsStore.addNotdir(result);
   };
 
   const backToList = () => {
@@ -49,7 +49,7 @@ export default function MainPage() {
       <div className="flex-1 relative">
         {!selectedPage && (
           <NotdirsContainer>
-            {pages.map((page) => (
+            {notdirsStore.notdirs.map((page) => (
               <li key={page.Id} onClick={() => onClickPageHandler(page)}>
                 <NotdirBox page={page} />
               </li>
@@ -62,4 +62,6 @@ export default function MainPage() {
       </div>
     </Layout>
   );
-}
+});
+
+export default MainPage;
