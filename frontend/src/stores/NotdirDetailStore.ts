@@ -36,6 +36,11 @@ class NotdirDetailStore {
     this.files = updatedFiles;
   }
 
+  syncWithUpdate() {
+    this.initialAtomdirs = [...this.atomdirs];
+    this.initialFiles = [...this.files];
+  }
+
   // Computed values for detecting changes
   get hasAtomdirsChanges() {
     return !isEqual(this.atomdirs, this.initialAtomdirs);

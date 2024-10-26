@@ -23,10 +23,6 @@ class NotdirsStore {
   }
 
   updateNotdir(id: string, atomdirs: main.Atomdir[], files: main.FileInfo[]) {
-    console.log(id);
-    console.log(atomdirs);
-    console.log(files);
-
     const updatedNotdirIndex = this.notdirs.findIndex(
       (notdir) => notdir.Id === id
     );

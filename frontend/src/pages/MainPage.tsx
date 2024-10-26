@@ -31,6 +31,7 @@ const MainPage = observer(() => {
       notdirDetailStore.atomdirs,
       notdirDetailStore.files
     );
+    notdirDetailStore.syncWithUpdate();
   };
 
   const buttonsProps: ButtonsProps = {
