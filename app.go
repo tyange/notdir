@@ -90,27 +90,27 @@ func (a *App) FileOpen(filePath string) error {
 	return err
 }
 
-type Notdir struct {
+type Atomdir struct {
 	Id    string
 	Name  string
 	Files []FileInfo
 }
 
-type Page struct {
-	Id      string
-	Name    string
-	Notdirs []Notdir
-	Files   []FileInfo
+type Notdir struct {
+	Id       string
+	Name     string
+	Atomdirs []Atomdir
+	Files    []FileInfo
 }
 
-func (a *App) FileSave(page Page) error {
-	jsonData, err := json.Marshal(page)
+func (a *App) FileSave(notdir Notdir) error {
+	jsonData, err := json.Marshal(notdir)
 	if err != nil {
 		fmt.Println("JSON 변환 중 오류 발생: ", err)
 		return err
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s.notdir", page.Name), jsonData, 0644)
+	err = os.WriteFile(fmt.Sprintf("%s.notdir", notdir.Name), jsonData, 0644)
 	if err != nil {
 		fmt.Println("파일 저장 중 오류 발생:", err)
 		return err
@@ -119,7 +119,7 @@ func (a *App) FileSave(page Page) error {
 	return nil
 }
 
-func (a *App) NotdirFileOpen() (*Page, error) {
+func (a *App) NotdirFileOpen() (*Notdir, error) {
 	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("파일 선택 중 오류 발생: %v", err)
@@ -130,14 +130,14 @@ func (a *App) NotdirFileOpen() (*Page, error) {
 		return nil, fmt.Errorf("파일 읽기 오류 발생: %v", err)
 	}
 
-	var page Page
+	var notdir Notdir
 
-	err = json.Unmarshal(content, &page)
+	err = json.Unmarshal(content, &notdir)
 	if err != nil {
 		return nil, fmt.Errorf("JSON 파싱 오류 발생: %v", err)
 	}
 
-	return &page, nil
+	return &notdir, nil
 }
 
 func (a *App) FileExists(path string) bool {

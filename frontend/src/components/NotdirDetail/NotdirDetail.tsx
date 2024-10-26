@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 
 import { main } from "../../../wailsjs/go/models";
 
@@ -6,19 +6,15 @@ import AtomdirList from "../AtomdirList/AtomdirList";
 import FileList from "../FileList/FileList";
 
 type NotdirDetailProps = {
-  page: main.Page;
-  setSelectedPage: Dispatch<SetStateAction<main.Page | null>>;
+  notdir: main.Notdir;
 };
 
-export default function NotdirDetail({
-  page,
-  setSelectedPage,
-}: NotdirDetailProps) {
-  const [notdirs, setNotdirs] = useState(page.Notdirs);
-  const [files, setFiles] = useState(page.Files);
+export default function NotdirDetail({ notdir }: NotdirDetailProps) {
+  const [atomdirs, setAtomdirs] = useState(notdir.Atomdirs);
+  const [files, setFiles] = useState(notdir.Files);
 
-  const handleNotdirsUpdate = (updatedNotdirs: main.Notdir[]) => {
-    setNotdirs(updatedNotdirs);
+  const handleAtomdirsUpdate = (updatedNotdirs: main.Atomdir[]) => {
+    setAtomdirs(updatedNotdirs);
   };
 
   const handleFilesUpdate = (updatedFiles: main.FileInfo[]) => {
@@ -27,10 +23,10 @@ export default function NotdirDetail({
 
   return (
     <div className="w-full h-full flex flex-col gap-10">
-      {page.Notdirs.length > 0 && (
-        <AtomdirList notdirs={notdirs} setNotdirs={handleNotdirsUpdate} />
+      {notdir.Atomdirs.length > 0 && (
+        <AtomdirList atomdirs={atomdirs} setAtomdirs={handleAtomdirsUpdate} />
       )}
-      {page.Files.length > 0 && (
+      {notdir.Files.length > 0 && (
         <FileList files={files} setFiles={handleFilesUpdate} />
       )}
     </div>

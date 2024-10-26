@@ -43,13 +43,13 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class Notdir {
+	export class Atomdir {
 	    Id: string;
 	    Name: string;
 	    Files: FileInfo[];
 	
 	    static createFrom(source: any = {}) {
-	        return new Notdir(source);
+	        return new Atomdir(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -77,21 +77,22 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class Page {
+	
+	export class Notdir {
 	    Id: string;
 	    Name: string;
-	    Notdirs: Notdir[];
+	    Atomdirs: Atomdir[];
 	    Files: FileInfo[];
 	
 	    static createFrom(source: any = {}) {
-	        return new Page(source);
+	        return new Notdir(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.Id = source["Id"];
 	        this.Name = source["Name"];
-	        this.Notdirs = this.convertValues(source["Notdirs"], Notdir);
+	        this.Atomdirs = this.convertValues(source["Atomdirs"], Atomdir);
 	        this.Files = this.convertValues(source["Files"], FileInfo);
 	    }
 	

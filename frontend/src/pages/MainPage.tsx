@@ -13,7 +13,9 @@ import NotdirBox from "../components/NotdirBox/NotdirBox";
 import NotdirDetail from "../components/NotdirDetail/NotdirDetail";
 
 const MainPage = observer(() => {
-  const [selectedPage, setSelectedPage] = useState<main.Page | null>(null);
+  const [selectedNotdir, setSelectedNotdir] = useState<main.Notdir | null>(
+    null
+  );
 
   const notdirFileOpen = async () => {
     const result = await NotdirFileOpen();
@@ -21,7 +23,7 @@ const MainPage = observer(() => {
   };
 
   const backToList = () => {
-    setSelectedPage(null);
+    setSelectedNotdir(null);
   };
 
   const buttonsProps: ButtonsProps = {
@@ -29,25 +31,25 @@ const MainPage = observer(() => {
       {
         text: "back",
         handler: backToList,
-        enabled: !!selectedPage,
+        enabled: !!selectedNotdir,
       },
       {
         text: "open",
         handler: notdirFileOpen,
-        enabled: !selectedPage,
+        enabled: !selectedNotdir,
       },
     ],
   };
 
-  const onClickPageHandler = (page: main.Page) => {
-    setSelectedPage(page);
+  const onClickPageHandler = (page: main.Notdir) => {
+    setSelectedNotdir(page);
   };
 
   return (
     <Layout>
       <Buttons {...buttonsProps} />
       <div className="flex-1 relative">
-        {!selectedPage && (
+        {!selectedNotdir && (
           <NotdirsContainer>
             {notdirsStore.notdirs.map((page) => (
               <li key={page.Id} onClick={() => onClickPageHandler(page)}>
@@ -56,9 +58,7 @@ const MainPage = observer(() => {
             ))}
           </NotdirsContainer>
         )}
-        {selectedPage && (
-          <NotdirDetail page={selectedPage} setSelectedPage={setSelectedPage} />
-        )}
+        {selectedNotdir && <NotdirDetail notdir={selectedNotdir} />}
       </div>
     </Layout>
   );

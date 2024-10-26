@@ -1,7 +1,7 @@
 import { main } from "../../../wailsjs/go/models";
 
 type NotdirBoxProps = {
-  page: main.Page;
+  page: main.Notdir;
 };
 
 export default function NotdirBox({ page }: NotdirBoxProps) {

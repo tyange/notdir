@@ -2,13 +2,13 @@ import { makeAutoObservable } from "mobx";
 import { main } from "../../wailsjs/go/models";
 
 class NotdirsStore {
-  notdirs: main.Page[] = [];
+  notdirs: main.Notdir[] = [];
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  addNotdir(page: main.Page) {
+  addNotdir(page: main.Notdir) {
     this.notdirs.push(page);
   }
 

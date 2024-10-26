@@ -2,63 +2,70 @@ import { useState, ChangeEvent } from "react";
 
 import { main } from "../../wailsjs/go/models";
 import { MultiSelection, FileSave } from "../../wailsjs/go/main/App";
-import { Node } from "../types/Node";
-import { useTempPageStore } from "../stores/useTempPageStore";
 
-// import DraggableItems from "../components/DraggableItems/DraggableItems";
-// import NotdirBox from "../components/NotdirList/NotdirBox/NotdirBox";
 import Layout from "../components/Layout/Layout";
 import Buttons, { ButtonsProps } from "../components/Buttons/Buttons";
+import DraggableItems from "../components/DraggableItems/DraggableItems";
+import AtomdirBox from "../components/AtomdirList/AtomdirBox/AtomdirBox";
+import FileBox from "../components/FileList/FileBox/FileBox";
 
 export default function NewPage() {
   const [name, setName] = useState("");
-  const [newNotdirName, setNewNotdirName] = useState("");
-  const [notdirs, setNotdirs] = useState<main.Notdir[]>([]);
+  const [newAtomdirName, setNewAtomdirName] = useState("");
+  const [atomdirs, setAtomdirs] = useState<main.Atomdir[]>([]);
+  const [files, setFiles] = useState<main.FileInfo[]>([]);
 
-  const { nodes, setNodes } = useTempPageStore();
-
-  async function selectFiles(): Promise<void> {
+  const selectFiles = async (): Promise<void> => {
     const result = await MultiSelection();
-    setNodes(
-      result.map((file) => ({
-        id: file.Id,
-        nodeInfo: file,
-        element: <div className="border border-gray-50">{file.Name}</div>,
-      }))
-    );
-  }
+    setFiles(result);
+  };
 
-  function onChangeNameInput(e: ChangeEvent<HTMLInputElement>) {
+  const onChangeNameInput = (e: ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
-  }
+  };
 
-  function onChangeNotdirNameInput(e: ChangeEvent<HTMLInputElement>) {
-    setNewNotdirName(e.target.value);
-  }
+  const onChangeAtomdirNameInput = (e: ChangeEvent<HTMLInputElement>) => {
+    setNewAtomdirName(e.target.value);
+  };
 
-  function onAddNotdir() {
-    const newNotdir = new main.Notdir({
+  const onAddAtomdir = () => {
+    const newAtomdir = new main.Atomdir({
       Id: crypto.randomUUID(),
-      Name: newNotdirName,
+      Name: newAtomdirName,
       Files: [],
     });
-    setNotdirs([...notdirs, newNotdir]);
-  }
 
-  function onSaveHandler() {
+    console.log(newAtomdir);
+
+    setAtomdirs([...atomdirs, newAtomdir]);
+  };
+
+  const onSaveHandler = () => {
     FileSave(
-      new main.Page({
+      new main.Notdir({
         Id: crypto.randomUUID(),
         Name: name,
-        Notdirs: notdirs,
-        Files: nodes.map((node) => node.nodeInfo),
+        Atomdirs: atomdirs,
+        Files: files,
       })
     );
-  }
+  };
 
-  function setNotdirsHandler(draggableItems: Node<main.Notdir>[]) {
-    setNotdirs(draggableItems.map((item) => item.nodeInfo));
-  }
+  const handleAtomdirsUpdate = (updatedNotdirs: main.Atomdir[]) => {
+    setAtomdirs(updatedNotdirs);
+  };
+
+  const renderAtomdir = (atomdir: main.Atomdir, isDragging: boolean) => {
+    return <AtomdirBox atomdir={atomdir} isDragging={isDragging} />;
+  };
+
+  const handleFilesUpdate = (updatedFiles: main.FileInfo[]) => {
+    setFiles(updatedFiles);
+  };
+
+  const renderFile = (file: main.FileInfo, isDragging: boolean) => (
+    <FileBox file={file} isDragging={isDragging} />
+  );
 
   const buttonsProps: ButtonsProps = {
     buttons: [{ text: "save", handler: onSaveHandler, enabled: true }],
@@ -75,35 +82,32 @@ export default function NewPage() {
       </div>
       <div>
         <label className="input input-bordered flex items-center gap-2">
-          Notdir Name
-          <input type="text" onChange={onChangeNotdirNameInput} />
+          Atomdir Name
+          <input type="text" onChange={onChangeAtomdirNameInput} />
         </label>
         <div className="join">
-          <button className="join-item btn" onClick={onAddNotdir}>
-            add notdir
+          <button className="join-item btn" onClick={onAddAtomdir}>
+            add atomdir
           </button>
           <button className="join-item btn" onClick={selectFiles}>
             select files
           </button>
         </div>
       </div>
-      {/* <div>
-        <DraggableItems
-          draggableItems={notdirs.map((notdir) => ({
-            id: notdir.Id,
-            nodeInfo: notdir,
-            element: <NotdirBox notdir={notdir} />,
-          }))}
-          setDraggableItems={setNotdirsHandler}
+      <div>
+        <DraggableItems<main.Atomdir>
+          draggableItems={atomdirs}
+          setDraggableItems={handleAtomdirsUpdate}
+          renderItem={renderAtomdir}
         />
       </div>
       <div>
-        <DraggableItems
-          draggableItems={nodes}
-          setDraggableItems={setNodes}
-          draggingNodeClassName="bg-red-600"
+        <DraggableItems<main.FileInfo>
+          draggableItems={files}
+          setDraggableItems={handleFilesUpdate}
+          renderItem={renderFile}
         />
-      </div> */}
+      </div>
     </Layout>
   );
 }

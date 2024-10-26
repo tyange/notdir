@@ -6,8 +6,8 @@ export function FileExists(arg1:string):Promise<boolean>;
 
 export function FileOpen(arg1:string):Promise<void>;
 
-export function FileSave(arg1:main.Page):Promise<void>;
+export function FileSave(arg1:main.Notdir):Promise<void>;
 
 export function MultiSelection():Promise<Array<main.FileInfo>>;
 
-export function NotdirFileOpen():Promise<main.Page>;
+export function NotdirFileOpen():Promise<main.Notdir>;
