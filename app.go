@@ -2,21 +2,25 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"os/exec"
 	stdruntime "runtime"
 	"time"
 
 	"github.com/google/uuid"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
 type App struct {
 	ctx context.Context
+	db  *sql.DB
 }
 
 // NewApp creates a new App application struct
@@ -28,6 +32,150 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	// 데이터베이스 초기화
+	err := a.initDatabase()
+	if err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+}
+
+// initDatabase initializes the SQLite database
+func (a *App) initDatabase() error {
+	// 데이터베이스 파일 경로 설정
+	dbPath := "./data.db"
+
+	// 데이터베이스 파일 존재 여부 확인
+	dbExists := fileExists(dbPath)
+
+	// 데이터베이스 연결
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %v", err)
+	}
+	a.db = db
+
+	// 데이터베이스 연결 테스트
+	err = db.Ping()
+	if err != nil {
+		return fmt.Errorf("failed to ping database: %v", err)
+	}
+
+	if !dbExists {
+		// 새로운 데이터베이스인 경우 테이블 생성
+		err = a.createTables()
+		if err != nil {
+			return fmt.Errorf("failed to create tables: %v", err)
+		}
+		log.Println("Created new database tables")
+	} else {
+		// 기존 데이터베이스의 구조 검증
+		err = a.validateTables()
+		if err != nil {
+			return fmt.Errorf("failed to validate tables: %v", err)
+		}
+		log.Println("Validated existing database tables")
+	}
+
+	return nil
+}
+
+// fileExists checks if a file exists
+func fileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return !os.IsNotExist(err)
+}
+
+// validateTables checks if all required tables exist
+func (a *App) validateTables() error {
+	requiredTables := []string{"notdir", "atomdir", "file_info"}
+
+	for _, table := range requiredTables {
+		var name string
+		err := a.db.QueryRow(`
+            SELECT name FROM sqlite_master 
+            WHERE type='table' AND name=?
+        `, table).Scan(&name)
+
+		if err == sql.ErrNoRows {
+			// 테이블이 없는 경우 생성
+			err = a.createTables()
+			if err != nil {
+				return fmt.Errorf("failed to create missing tables: %v", err)
+			}
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("failed to check table %s: %v", table, err)
+		}
+	}
+
+	return nil
+}
+
+// createTables creates all required database tables
+func (a *App) createTables() error {
+	queries := []string{
+		// FileInfo 테이블
+		`CREATE TABLE IF NOT EXISTS file_info (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            size INTEGER NOT NULL,
+            mode INTEGER NOT NULL,
+            mod_time DATETIME NOT NULL,
+            is_dir BOOLEAN NOT NULL,
+            path TEXT NOT NULL,
+            parent_atomdir_id TEXT,
+            parent_notdir_id TEXT,
+            FOREIGN KEY (parent_atomdir_id) REFERENCES atomdir(id) ON DELETE CASCADE,
+            FOREIGN KEY (parent_notdir_id) REFERENCES notdir(id) ON DELETE CASCADE
+        );`,
+
+		// Atomdir 테이블
+		`CREATE TABLE IF NOT EXISTS atomdir (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            parent_notdir_id TEXT NOT NULL,
+            FOREIGN KEY (parent_notdir_id) REFERENCES notdir(id) ON DELETE CASCADE
+        );`,
+
+		// Notdir 테이블
+		`CREATE TABLE IF NOT EXISTS notdir (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            path TEXT NOT NULL
+        );`,
+	}
+
+	// 트랜잭션 시작
+	tx, err := a.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %v", err)
+	}
+	defer tx.Rollback()
+
+	// 각 테이블 생성 쿼리 실행
+	for _, query := range queries {
+		_, err := tx.Exec(query)
+		if err != nil {
+			return fmt.Errorf("failed to execute query: %v", err)
+		}
+	}
+
+	// 트랜잭션 커밋
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("failed to commit transaction: %v", err)
+	}
+
+	return nil
+}
+
+// shutdown is called at application termination
+func (a *App) shutdown(ctx context.Context) {
+	// 데이터베이스 연결 종료
+	if a.db != nil {
+		a.db.Close()
+	}
 }
 
 func (a *App) ShowMessageDialog(options runtime.MessageDialogOptions) (*string, error) {
