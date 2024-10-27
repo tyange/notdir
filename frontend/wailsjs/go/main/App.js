@@ -26,6 +26,10 @@ export function NotdirFileOpen() {
   return window['go']['main']['App']['NotdirFileOpen']();
 }
 
+export function SaveNotdirToDb(arg1) {
+  return window['go']['main']['App']['SaveNotdirToDb'](arg1);
+}
+
 export function ShowMessageDialog(arg1) {
   return window['go']['main']['App']['ShowMessageDialog'](arg1);
 }

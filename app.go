@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	stdruntime "runtime"
 	"time"
 
@@ -19,8 +20,9 @@ import (
 
 // App struct
 type App struct {
-	ctx context.Context
-	db  *sql.DB
+	ctx    context.Context
+	db     *sql.DB
+	dbPath string
 }
 
 // NewApp creates a new App application struct
@@ -36,20 +38,67 @@ func (a *App) startup(ctx context.Context) {
 	// 데이터베이스 초기화
 	err := a.initDatabase()
 	if err != nil {
-		log.Fatal("Failed to initialize database:", err)
+		a.ShowMessageDialog(runtime.MessageDialogOptions{Message: fmt.Sprint(err), Type: runtime.ErrorDialog})
 	}
+}
+
+// getAppDataPath returns the appropriate directory for application data
+func getAppDataPath() (string, error) {
+	// 사용자의 홈 디렉토리 가져오기
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get home directory: %v", err)
+	}
+
+	// 애플리케이션 데이터 디렉토리 경로 생성
+	// Windows: %USERPROFILE%\AppData\Local\YourAppName
+	// macOS: ~/Library/Application Support/YourAppName
+	// Linux: ~/.local/share/YourAppName
+	var appDataDir string
+	switch os.Getenv("GOOS") {
+	case "windows":
+		appDataDir = filepath.Join(homeDir, "AppData", "Local", "notdir")
+	case "darwin":
+		appDataDir = filepath.Join(homeDir, "Library", "Application Support", "notdir")
+	default: // linux 및 기타
+		appDataDir = filepath.Join(homeDir, ".local", "share", "notdir")
+	}
+
+	return appDataDir, nil
 }
 
 // initDatabase initializes the SQLite database
 func (a *App) initDatabase() error {
+	// 애플리케이션 데이터 디렉토리 가져오기
+	appDataDir, err := getAppDataPath()
+	if err != nil {
+		return fmt.Errorf("failed to get app data path: %v", err)
+	}
+
 	// 데이터베이스 파일 경로 설정
-	dbPath := "./data.db"
+	a.dbPath = filepath.Join(appDataDir, "data.db")
+	log.Printf("Database path: %s", a.dbPath)
 
 	// 데이터베이스 파일 존재 여부 확인
-	dbExists := fileExists(dbPath)
+	dbExists := a.FileExists(a.dbPath)
+
+	if !dbExists {
+		dbDir := filepath.Dir(a.dbPath)
+		err = os.MkdirAll(dbDir, 0755)
+		if err != nil {
+			return fmt.Errorf("failed to create database directory: %v", err)
+		}
+
+		// 빈 파일 생성
+		file, err := os.Create(a.dbPath)
+		if err != nil {
+			return fmt.Errorf("failed to create database file: %v", err)
+		}
+		file.Close()
+	}
 
 	// 데이터베이스 연결
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", a.dbPath)
 	if err != nil {
 		return fmt.Errorf("failed to open database: %v", err)
 	}
@@ -78,12 +127,6 @@ func (a *App) initDatabase() error {
 	}
 
 	return nil
-}
-
-// fileExists checks if a file exists
-func fileExists(filename string) bool {
-	_, err := os.Stat(filename)
-	return !os.IsNotExist(err)
 }
 
 // validateTables checks if all required tables exist
@@ -168,6 +211,10 @@ func (a *App) createTables() error {
 	}
 
 	return nil
+}
+
+func (a *App) GetInitialData() {
+
 }
 
 // shutdown is called at application termination
@@ -324,25 +371,119 @@ func (a *App) FileSaveWithDialog(notdir Notdir) error {
 	return nil
 }
 
+// NotdirFileOpen opens a Notdir JSON file and updates the database
 func (a *App) NotdirFileOpen() (*Notdir, error) {
+	// 파일 선택 다이얼로그 열기
 	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("파일 선택 중 오류 발생: %v", err)
 	}
 
+	// 파일 읽기
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("파일 읽기 오류 발생: %v", err)
 	}
 
+	// JSON 파싱
 	var notdir Notdir
-
 	err = json.Unmarshal(content, &notdir)
 	if err != nil {
 		return nil, fmt.Errorf("JSON 파싱 오류 발생: %v", err)
 	}
 
+	// 데이터베이스 업데이트
+	err = a.SaveNotdirToDb(&notdir)
+	if err != nil {
+		return nil, fmt.Errorf("데이터베이스 저장 중 오류 발생: %v", err)
+	}
+
 	return &notdir, nil
+}
+
+// SaveNotdirToDb saves a Notdir structure to the database using a transaction
+func (a *App) SaveNotdirToDb(notdir *Notdir) error {
+	// 트랜잭션 시작
+	tx, err := a.db.Begin()
+	if err != nil {
+		return fmt.Errorf("트랜잭션 시작 오류: %v", err)
+	}
+	defer tx.Rollback() // 오류 발생 시 롤백
+
+	// 1. Notdir 정보 저장/업데이트
+	_, err = tx.Exec(`
+        INSERT OR REPLACE INTO notdir (id, name, path)
+        VALUES (?, ?, ?)
+    `, notdir.Id, notdir.Name, notdir.Path)
+	if err != nil {
+		return fmt.Errorf("notdir 저장 오류: %v", err)
+	}
+
+	// 2. 기존의 관련 Atomdir들 삭제 (cascade delete will handle related files)
+	_, err = tx.Exec(`
+        DELETE FROM atomdir 
+        WHERE parent_notdir_id = ?
+    `, notdir.Id)
+	if err != nil {
+		return fmt.Errorf("기존 atomdir 삭제 오류: %v", err)
+	}
+
+	// 3. 기존의 직접 연결된 파일들 삭제
+	_, err = tx.Exec(`
+        DELETE FROM file_info 
+        WHERE parent_notdir_id = ?
+    `, notdir.Id)
+	if err != nil {
+		return fmt.Errorf("기존 file_info 삭제 오류: %v", err)
+	}
+
+	// 4. Atomdir들 저장
+	for _, atomdir := range notdir.Atomdirs {
+		// Atomdir 저장
+		_, err = tx.Exec(`
+            INSERT INTO atomdir (id, name, parent_notdir_id)
+            VALUES (?, ?, ?)
+        `, atomdir.Id, atomdir.Name, notdir.Id)
+		if err != nil {
+			return fmt.Errorf("atomdir 저장 오류: %v", err)
+		}
+
+		// Atomdir에 속한 파일들 저장
+		for _, file := range atomdir.Files {
+			_, err = tx.Exec(`
+                INSERT INTO file_info (
+                    id, name, size, mode, mod_time, is_dir, path,
+                    parent_atomdir_id, parent_notdir_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)
+            `, file.Id, file.Name, file.Size, int64(file.Mode),
+				file.ModTime, file.IsDir, file.Path, atomdir.Id)
+			if err != nil {
+				return fmt.Errorf("atomdir의 file_info 저장 오류: %v", err)
+			}
+		}
+	}
+
+	// 5. Notdir에 직접 속한 파일들 저장
+	for _, file := range notdir.Files {
+		_, err = tx.Exec(`
+            INSERT INTO file_info (
+                id, name, size, mode, mod_time, is_dir, path,
+                parent_atomdir_id, parent_notdir_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?)
+        `, file.Id, file.Name, file.Size, int64(file.Mode),
+			file.ModTime, file.IsDir, file.Path, notdir.Id)
+		if err != nil {
+			return fmt.Errorf("notdir의 file_info 저장 오류: %v", err)
+		}
+	}
+
+	// 트랜잭션 커밋
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("트랜잭션 커밋 오류: %v", err)
+	}
+
+	return nil
 }
 
 func (a *App) FileExists(path string) bool {

@@ -15,4 +15,6 @@ export function MultiSelection():Promise<Array<main.FileInfo>>;
 
 export function NotdirFileOpen():Promise<main.Notdir>;
 
+export function SaveNotdirToDb(arg1:main.Notdir):Promise<void>;
+
 export function ShowMessageDialog(arg1:frontend.MessageDialogOptions):Promise<any>;
