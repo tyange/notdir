@@ -145,6 +145,22 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class NotdirBase {
+	    Id: string;
+	    Name: string;
+	    Path: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new NotdirBase(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Id = source["Id"];
+	        this.Name = source["Name"];
+	        this.Path = source["Path"];
+	    }
+	}
 
 }
 

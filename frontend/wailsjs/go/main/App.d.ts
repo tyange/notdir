@@ -5,15 +5,17 @@ import {frontend} from '../models';
 
 export function FileExists(arg1:string):Promise<boolean>;
 
-export function FileOpen(arg1:string):Promise<void>;
-
 export function FileSave(arg1:main.Notdir):Promise<void>;
 
 export function FileSaveWithDialog(arg1:main.Notdir):Promise<void>;
 
+export function GetInitialData():Promise<Array<main.NotdirBase>>;
+
 export function MultiSelection():Promise<Array<main.FileInfo>>;
 
-export function NotdirFileOpen():Promise<main.Notdir>;
+export function NotdirFileOpen(arg1:any):Promise<main.Notdir>;
+
+export function RunFile(arg1:string):Promise<void>;
 
 export function SaveNotdirToDb(arg1:main.Notdir):Promise<void>;
 

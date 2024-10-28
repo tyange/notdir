@@ -6,10 +6,6 @@ export function FileExists(arg1) {
   return window['go']['main']['App']['FileExists'](arg1);
 }
 
-export function FileOpen(arg1) {
-  return window['go']['main']['App']['FileOpen'](arg1);
-}
-
 export function FileSave(arg1) {
   return window['go']['main']['App']['FileSave'](arg1);
 }
@@ -18,12 +14,20 @@ export function FileSaveWithDialog(arg1) {
   return window['go']['main']['App']['FileSaveWithDialog'](arg1);
 }
 
+export function GetInitialData() {
+  return window['go']['main']['App']['GetInitialData']();
+}
+
 export function MultiSelection() {
   return window['go']['main']['App']['MultiSelection']();
 }
 
-export function NotdirFileOpen() {
-  return window['go']['main']['App']['NotdirFileOpen']();
+export function NotdirFileOpen(arg1) {
+  return window['go']['main']['App']['NotdirFileOpen'](arg1);
+}
+
+export function RunFile(arg1) {
+  return window['go']['main']['App']['RunFile'](arg1);
 }
 
 export function SaveNotdirToDb(arg1) {

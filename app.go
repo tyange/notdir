@@ -131,7 +131,7 @@ func (a *App) initDatabase() error {
 
 // validateTables checks if all required tables exist
 func (a *App) validateTables() error {
-	requiredTables := []string{"notdir", "atomdir", "file_info"}
+	requiredTables := []string{"notdir"}
 
 	for _, table := range requiredTables {
 		var name string
@@ -157,37 +157,12 @@ func (a *App) validateTables() error {
 
 // createTables creates all required database tables
 func (a *App) createTables() error {
-	queries := []string{
-		// FileInfo 테이블
-		`CREATE TABLE IF NOT EXISTS file_info (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            size INTEGER NOT NULL,
-            mode INTEGER NOT NULL,
-            mod_time DATETIME NOT NULL,
-            is_dir BOOLEAN NOT NULL,
-            path TEXT NOT NULL,
-            parent_atomdir_id TEXT,
-            parent_notdir_id TEXT,
-            FOREIGN KEY (parent_atomdir_id) REFERENCES atomdir(id) ON DELETE CASCADE,
-            FOREIGN KEY (parent_notdir_id) REFERENCES notdir(id) ON DELETE CASCADE
-        );`,
-
-		// Atomdir 테이블
-		`CREATE TABLE IF NOT EXISTS atomdir (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            parent_notdir_id TEXT NOT NULL,
-            FOREIGN KEY (parent_notdir_id) REFERENCES notdir(id) ON DELETE CASCADE
-        );`,
-
-		// Notdir 테이블
+	query :=
 		`CREATE TABLE IF NOT EXISTS notdir (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             path TEXT NOT NULL
-        );`,
-	}
+        );`
 
 	// 트랜잭션 시작
 	tx, err := a.db.Begin()
@@ -196,12 +171,10 @@ func (a *App) createTables() error {
 	}
 	defer tx.Rollback()
 
-	// 각 테이블 생성 쿼리 실행
-	for _, query := range queries {
-		_, err := tx.Exec(query)
-		if err != nil {
-			return fmt.Errorf("failed to execute query: %v", err)
-		}
+	// 테이블 생성 쿼리 실행
+	_, err = tx.Exec(query)
+	if err != nil {
+		return fmt.Errorf("failed to execute query: %v", err)
 	}
 
 	// 트랜잭션 커밋
@@ -213,8 +186,38 @@ func (a *App) createTables() error {
 	return nil
 }
 
-func (a *App) GetInitialData() {
+type NotdirBase struct {
+	Id   string `db:"id"`
+	Name string `db:"name"`
+	Path string `db:"path"`
+}
 
+func (a *App) GetInitialData() ([]*NotdirBase, error) {
+	query := `
+        SELECT id, name, path
+        FROM notdir
+    `
+
+	rows, err := a.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer rows.Close()
+
+	var results []*NotdirBase
+	for rows.Next() {
+		item := &NotdirBase{}
+		if err := rows.Scan(&item.Id, &item.Name, &item.Path); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %v", err)
+		}
+		results = append(results, item)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %v", err)
+	}
+
+	return results, nil
 }
 
 // shutdown is called at application termination
@@ -273,7 +276,7 @@ func (a *App) MultiSelection() ([]FileInfo, error) {
 	return files, nil
 }
 
-func (a *App) FileOpen(filePath string) error {
+func (a *App) RunFile(filePath string) error {
 	var cmd = exec.Command("open", filePath)
 
 	switch stdruntime.GOOS {
@@ -372,11 +375,17 @@ func (a *App) FileSaveWithDialog(notdir Notdir) error {
 }
 
 // NotdirFileOpen opens a Notdir JSON file and updates the database
-func (a *App) NotdirFileOpen() (*Notdir, error) {
-	// 파일 선택 다이얼로그 열기
-	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("파일 선택 중 오류 발생: %v", err)
+func (a *App) NotdirFileOpen(givenPath *string) (*Notdir, error) {
+
+	var path string
+	if givenPath == nil || *givenPath == "" {
+		var err error
+		path, err = runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
+		if err != nil {
+			return nil, fmt.Errorf("파일 선택 중 오류 발생: %v", err)
+		}
+	} else {
+		path = *givenPath
 	}
 
 	// 파일 읽기
@@ -410,71 +419,13 @@ func (a *App) SaveNotdirToDb(notdir *Notdir) error {
 	}
 	defer tx.Rollback() // 오류 발생 시 롤백
 
-	// 1. Notdir 정보 저장/업데이트
+	// Notdir 정보 저장/업데이트
 	_, err = tx.Exec(`
         INSERT OR REPLACE INTO notdir (id, name, path)
         VALUES (?, ?, ?)
     `, notdir.Id, notdir.Name, notdir.Path)
 	if err != nil {
 		return fmt.Errorf("notdir 저장 오류: %v", err)
-	}
-
-	// 2. 기존의 관련 Atomdir들 삭제 (cascade delete will handle related files)
-	_, err = tx.Exec(`
-        DELETE FROM atomdir 
-        WHERE parent_notdir_id = ?
-    `, notdir.Id)
-	if err != nil {
-		return fmt.Errorf("기존 atomdir 삭제 오류: %v", err)
-	}
-
-	// 3. 기존의 직접 연결된 파일들 삭제
-	_, err = tx.Exec(`
-        DELETE FROM file_info 
-        WHERE parent_notdir_id = ?
-    `, notdir.Id)
-	if err != nil {
-		return fmt.Errorf("기존 file_info 삭제 오류: %v", err)
-	}
-
-	// 4. Atomdir들 저장
-	for _, atomdir := range notdir.Atomdirs {
-		// Atomdir 저장
-		_, err = tx.Exec(`
-            INSERT INTO atomdir (id, name, parent_notdir_id)
-            VALUES (?, ?, ?)
-        `, atomdir.Id, atomdir.Name, notdir.Id)
-		if err != nil {
-			return fmt.Errorf("atomdir 저장 오류: %v", err)
-		}
-
-		// Atomdir에 속한 파일들 저장
-		for _, file := range atomdir.Files {
-			_, err = tx.Exec(`
-                INSERT INTO file_info (
-                    id, name, size, mode, mod_time, is_dir, path,
-                    parent_atomdir_id, parent_notdir_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)
-            `, file.Id, file.Name, file.Size, int64(file.Mode),
-				file.ModTime, file.IsDir, file.Path, atomdir.Id)
-			if err != nil {
-				return fmt.Errorf("atomdir의 file_info 저장 오류: %v", err)
-			}
-		}
-	}
-
-	// 5. Notdir에 직접 속한 파일들 저장
-	for _, file := range notdir.Files {
-		_, err = tx.Exec(`
-            INSERT INTO file_info (
-                id, name, size, mode, mod_time, is_dir, path,
-                parent_atomdir_id, parent_notdir_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?)
-        `, file.Id, file.Name, file.Size, int64(file.Mode),
-			file.ModTime, file.IsDir, file.Path, notdir.Id)
-		if err != nil {
-			return fmt.Errorf("notdir의 file_info 저장 오류: %v", err)
-		}
 	}
 
 	// 트랜잭션 커밋

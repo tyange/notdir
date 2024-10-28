@@ -1,12 +1,15 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { isEqual } from "es-toolkit";
 
 import { main } from "../../wailsjs/go/models";
 
 class NotdirDetailStore {
-  currentNotdirId: string = "";
+  currentNotdirId = "";
+  notdirName = "";
+  currentNotdirPath = "";
   atomdirs: main.Atomdir[] = [];
   files: main.FileInfo[] = [];
+  initialName = "";
   initialAtomdirs: main.Atomdir[] = [];
   initialFiles: main.FileInfo[] = [];
 
@@ -14,18 +17,39 @@ class NotdirDetailStore {
     makeAutoObservable(this);
   }
 
-  setCurrentNotdirId(notdir: main.Notdir) {
-    this.currentNotdirId = notdir.Id;
+  setCurrentNotdirId(id: string) {
+    this.currentNotdirId = id;
   }
 
-  setCurrentAtomdirs(notdir: main.Notdir) {
-    this.atomdirs = notdir.Atomdirs;
-    this.initialAtomdirs = [...notdir.Atomdirs];
+  setCurrentNotdirName(name: string) {
+    this.notdirName = name;
+    this.initialName = name;
   }
 
-  setCurrentFiles(notdir: main.Notdir) {
-    this.files = notdir.Files;
-    this.initialFiles = [...notdir.Files];
+  setCurrentNotdirPath(path: string) {
+    this.currentNotdirPath = path;
+  }
+
+  setCurrentNotdirAtomdirs(atomdirs: main.Atomdir[]) {
+    this.atomdirs = atomdirs;
+    this.initialAtomdirs = [...atomdirs];
+  }
+
+  setCurrentNotdirFiles(files: main.FileInfo[]) {
+    this.files = files;
+    this.initialFiles = [...files];
+  }
+
+  setCurrentNotdir(notdir: main.Notdir) {
+    runInAction(() => {
+      this.currentNotdirId = notdir.Id;
+      this.notdirName = notdir.Name;
+      this.currentNotdirPath = notdir.Path;
+      this.atomdirs = notdir.Atomdirs;
+      this.initialAtomdirs = [...notdir.Atomdirs];
+      this.files = notdir.Files;
+      this.initialFiles = [...notdir.Files];
+    });
   }
 
   updateAtomdirs(updatedAtomdirs: main.Atomdir[]) {
@@ -37,11 +61,11 @@ class NotdirDetailStore {
   }
 
   syncWithUpdate() {
+    this.initialName = this.notdirName;
     this.initialAtomdirs = [...this.atomdirs];
     this.initialFiles = [...this.files];
   }
 
-  // Computed values for detecting changes
   get hasAtomdirsChanges() {
     return !isEqual(this.atomdirs, this.initialAtomdirs);
   }
@@ -54,7 +78,6 @@ class NotdirDetailStore {
     return this.hasAtomdirsChanges || this.hasFilesChanges;
   }
 
-  // Original computed values
   get hasAtomdirs() {
     return this.atomdirs.length > 0;
   }
@@ -67,9 +90,10 @@ class NotdirDetailStore {
     return !this.hasAtomdirs && !this.hasFiles;
   }
 
-  // Helper methods
   reset() {
     this.currentNotdirId = "";
+    this.notdirName = "";
+    this.currentNotdirPath = "";
     this.atomdirs = [];
     this.files = [];
     this.initialAtomdirs = [];

@@ -3,7 +3,7 @@ import { match } from "ts-pattern";
 import classNames from "classnames";
 
 import { main } from "../../../../wailsjs/go/models";
-import { FileExists, FileOpen } from "../../../../wailsjs/go/main/App";
+import { FileExists } from "../../../../wailsjs/go/main/App";
 
 type FileBoxProps = {
   file: main.FileInfo;
@@ -23,7 +23,8 @@ export default function FileBox({ file, isDragging }: FileBoxProps) {
 
   const onDoubleClickHandler = async (path: string) => {
     if (!isDisabled) {
-      await FileOpen(path);
+      // await FileOpen(path);
+      console.log("Double Clicked!");
     }
   };
 
