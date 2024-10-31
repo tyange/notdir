@@ -79,15 +79,15 @@ const MainPage = observer(() => {
   };
 
   const onClickNotdirHandler = async (notdirBase: main.NotdirBase) => {
-    // if (!notdirBase.Path || notdirBase.Path === "") {
-    //   await ShowMessageDialog(
-    //     new frontend.MessageDialogOptions({
-    //       Message: "notdir의 경로가 없거나, 빈 문자열입니다.",
-    //       Type: "warning",
-    //     })
-    //   );
-    //   return;
-    // }
+    if (!notdirBase.Path || notdirBase.Path === "") {
+      await ShowMessageDialog(
+        new frontend.MessageDialogOptions({
+          Message: "notdir의 경로가 없거나, 빈 문자열입니다.",
+          Type: "warning",
+        })
+      );
+      return;
+    }
 
     try {
       const result = await NotdirFileOpen(notdirBase.Path);
@@ -111,7 +111,6 @@ const MainPage = observer(() => {
 
   const fetchInitialData = async () => {
     const result = await GetInitialData();
-    console.log(result);
     notdirsBasesStore.setNotdirBases(result);
   };
 

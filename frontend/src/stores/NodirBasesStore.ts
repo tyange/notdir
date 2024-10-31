@@ -21,7 +21,6 @@ class NotdirBasesStore {
     });
   }
 
-  // 필요한 경우 추가적인 메서드들
   removeNotdirBase(notdirId: string) {
     this.notdirsBases = this.notdirsBases.filter(
       (page) => page.Id !== notdirId
