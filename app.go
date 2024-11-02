@@ -161,7 +161,8 @@ func (a *App) createTables() error {
 		`CREATE TABLE IF NOT EXISTS notdir (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            path TEXT NOT NULL
+            path TEXT NOT NULL,
+			created_at DATETIME DEFAULT (datetime('now', 'localtime'))
         );`
 
 	// 트랜잭션 시작
@@ -187,15 +188,17 @@ func (a *App) createTables() error {
 }
 
 type NotdirBase struct {
-	Id   string `db:"id"`
-	Name string `db:"name"`
-	Path string `db:"path"`
+	Id        string    `db:"id"`
+	Name      string    `db:"name"`
+	Path      string    `db:"path"`
+	CreatedAt time.Time `db:"created_at"`
 }
 
 func (a *App) GetInitialData() ([]*NotdirBase, error) {
 	query := `
-        SELECT id, name, path
+        SELECT id, name, path, created_at
         FROM notdir
+        ORDER BY created_at ASC
     `
 
 	rows, err := a.db.Query(query)
@@ -207,7 +210,7 @@ func (a *App) GetInitialData() ([]*NotdirBase, error) {
 	var results []*NotdirBase
 	for rows.Next() {
 		item := &NotdirBase{}
-		if err := rows.Scan(&item.Id, &item.Name, &item.Path); err != nil {
+		if err := rows.Scan(&item.Id, &item.Name, &item.Path, &item.CreatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan row: %v", err)
 		}
 		results = append(results, item)
@@ -375,17 +378,23 @@ func (a *App) FileSaveWithDialog(notdir Notdir) error {
 }
 
 // NotdirFileOpen opens a Notdir JSON file and updates the database
-func (a *App) NotdirFileOpen(givenPath *string) (*Notdir, error) {
-
+func (a *App) NotdirFileOpen(id *string) (*Notdir, error) {
 	var path string
-	if givenPath == nil || *givenPath == "" {
+	if id == nil || *id == "" {
 		var err error
 		path, err = runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{})
 		if err != nil {
 			return nil, fmt.Errorf("파일 선택 중 오류 발생: %v", err)
 		}
 	} else {
-		path = *givenPath
+		row := a.db.QueryRow("SELECT path FROM notdir WHERE id = ?", id)
+		var dbPath string
+		err := row.Scan(&dbPath)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, fmt.Errorf("데이터베이스 조회 중 오류 발생: %v", err)
+		}
+
+		path = dbPath
 	}
 
 	// 파일 읽기
@@ -410,7 +419,6 @@ func (a *App) NotdirFileOpen(givenPath *string) (*Notdir, error) {
 	return &notdir, nil
 }
 
-// SaveNotdirToDb saves a Notdir structure to the database using a transaction
 func (a *App) SaveNotdirToDb(notdir *Notdir) error {
 	// 트랜잭션 시작
 	tx, err := a.db.Begin()
@@ -419,11 +427,28 @@ func (a *App) SaveNotdirToDb(notdir *Notdir) error {
 	}
 	defer tx.Rollback() // 오류 발생 시 롤백
 
-	// Notdir 정보 저장/업데이트
-	_, err = tx.Exec(`
-        INSERT OR REPLACE INTO notdir (id, name, path)
-        VALUES (?, ?, ?)
-    `, notdir.Id, notdir.Name, notdir.Path)
+	// 먼저 해당 ID가 존재하는지 확인
+	var exists bool
+	err = tx.QueryRow("SELECT EXISTS(SELECT 1 FROM notdir WHERE id = ?)", notdir.Id).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("ID 존재 여부 확인 오류: %v", err)
+	}
+
+	if exists {
+		// ID가 존재하면 UPDATE (created_at 제외하고 업데이트)
+		_, err = tx.Exec(`
+            UPDATE notdir 
+            SET name = ?, path = ?
+            WHERE id = ?
+        `, notdir.Name, notdir.Path, notdir.Id)
+	} else {
+		// ID가 존재하지 않으면 INSERT
+		_, err = tx.Exec(`
+            INSERT INTO notdir (id, name, path)
+            VALUES (?, ?, ?)
+        `, notdir.Id, notdir.Name, notdir.Path)
+	}
+
 	if err != nil {
 		return fmt.Errorf("notdir 저장 오류: %v", err)
 	}

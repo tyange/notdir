@@ -14,11 +14,13 @@ class NotdirBasesStore {
   }
 
   addNotdirBase(notdir: main.Notdir) {
-    this.notdirsBases.push({
+    const newNotdir = new main.NotdirBase({
       Id: notdir.Id,
       Name: notdir.Name,
       Path: notdir.Path,
     });
+
+    this.notdirsBases.push(newNotdir);
   }
 
   removeNotdirBase(notdirId: string) {
