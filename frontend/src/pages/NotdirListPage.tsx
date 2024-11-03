@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 
 import { ShowMessageDialog, GetInitialData } from "../../wailsjs/go/main/App";
 import { main, frontend } from "../../wailsjs/go/models";
-import { notdirsBasesStore } from "../stores/NodirBasesStore";
+import { notdirsBasesStore } from "../stores/NotdirBasesStore";
 
 import NotdirBox from "../components/NotdirBox/NotdirBox";
 import NotdirsContainer from "../components/NotdirsContainer/NotdirsContainer";

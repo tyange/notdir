@@ -1,5 +1,5 @@
-import { Suspense } from "react";
-import { useLocation, Outlet } from "react-router-dom";
+import { useState } from "react";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 
 import {
@@ -9,15 +9,16 @@ import {
 } from "../../../wailsjs/go/main/App";
 import { frontend, main } from "../../../wailsjs/go/models";
 
-import { notdirsBasesStore } from "../../stores/NodirBasesStore";
+import { notdirsBasesStore } from "../../stores/NotdirBasesStore";
 import { notdirDetailStore } from "../../stores/NotdirDetailStore";
 
 import Buttons from "../Buttons/Buttons";
 import Layout from "./Layout";
 
 const MainLayout = observer(() => {
-  const location = useLocation();
-  const isDetailPage = location.pathname !== "/";
+  const [isEdit, setIsEdit] = useState(false);
+
+  const navigate = useNavigate();
 
   const notdirFileOpen = async () => {
     const result = await NotdirFileOpen("");
@@ -49,25 +50,29 @@ const MainLayout = observer(() => {
     notdirDetailStore.syncWithUpdate();
   };
 
+  const handleEdit = () => {
+    setIsEdit(true);
+  };
+
   const buttonsProps = {
     buttons: [
       {
+        text: "open",
+        handler: notdirFileOpen,
+        visiblePaths: ["/"],
+        disabled: false,
+      },
+      {
         text: "back",
-        handler: () => window.history.back(),
-        enabled: isDetailPage,
+        handler: () => navigate("/"),
+        visiblePaths: ["notdir"],
         disabled: false,
       },
       {
         text: "save",
         handler: handleSave,
-        enabled: isDetailPage,
+        visiblePaths: ["notdir"],
         disabled: !notdirDetailStore.hasAnyChanges,
-      },
-      {
-        text: "open",
-        handler: notdirFileOpen,
-        enabled: !isDetailPage,
-        disabled: false,
       },
     ],
   };

@@ -1,9 +1,10 @@
 import classNames from "classnames";
+import { usePathSegment } from "../../hooks/usePathSegment";
 
 type ButtonProps = {
   text: string;
   handler: () => void;
-  enabled: boolean;
+  visiblePaths: string[];
   disabled: boolean;
 };
 
@@ -19,7 +20,7 @@ export default function Buttons({ buttons }: ButtonsProps) {
   return (
     <div className="join flex-1 flex p-5 absolute -top-20 -left-5">
       {buttons
-        .filter((button) => button.enabled)
+        .filter((button) => button.visiblePaths.includes(usePathSegment()))
         .map((button) => (
           <button
             key={button.text}
