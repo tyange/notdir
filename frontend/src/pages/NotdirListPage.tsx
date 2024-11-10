@@ -10,6 +10,7 @@ import NotdirBox from "../components/NotdirBox/NotdirBox";
 import NotdirsContainer from "../components/NotdirsContainer/NotdirsContainer";
 import Loading from "../components/Loading/Loading";
 import ResultState from "../components/ResultState/ResultState";
+import DraggableItems from "../components/DraggableItems/DraggableItems";
 
 const NotdirListPage = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +59,21 @@ const NotdirListPage = observer(() => {
     }
   };
 
+  const renderItem = (notdirBase: main.NotdirBase, isDragging: boolean) => {
+    return (
+      <NotdirBox
+        key={notdirBase.Id}
+        onClick={() => onClickNotdirHandler(notdirBase)}
+        notdir={notdirBase}
+      />
+    );
+  };
+
+  const handleNotdirBasesChange = (notdirBases: main.NotdirBase[]) => {
+    console.log(notdirBases);
+    notdirsBasesStore.updateNotdirBases(notdirBases);
+  };
+
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -67,21 +83,20 @@ const NotdirListPage = observer(() => {
   if (isError) return <ResultState message="에러가 발생했습니다!" />;
 
   if (
-    notdirsBasesStore.notdirsBases &&
-    notdirsBasesStore.notdirsBases.length === 0
+    notdirsBasesStore.notdirBases &&
+    notdirsBasesStore.notdirBases.length === 0
   )
     return <ResultState message="아직 열린 Notdir가 없어요!" />;
 
   return (
     <NotdirsContainer>
-      {notdirsBasesStore.notdirsBases.map((notdirBase) => (
-        <li
-          key={notdirBase.Id}
-          onClick={() => onClickNotdirHandler(notdirBase)}
-        >
-          <NotdirBox notdir={notdirBase} />
-        </li>
-      ))}
+      <DraggableItems<main.NotdirBase>
+        draggableItems={notdirsBasesStore.notdirBases}
+        setDraggableItems={(notdirBases) =>
+          notdirsBasesStore.updateNotdirBases(notdirBases)
+        }
+        renderItem={renderItem}
+      />
     </NotdirsContainer>
   );
 });

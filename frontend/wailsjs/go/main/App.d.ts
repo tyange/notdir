@@ -15,7 +15,7 @@ export function MultiSelection():Promise<Array<main.FileInfo>>;
 
 export function NotdirFileOpen(arg1:any):Promise<main.Notdir>;
 
-export function RemoveNotdirInList(arg1:any):Promise<void>;
+export function RemoveNotdirsInList(arg1:Array<any>):Promise<void>;
 
 export function RunFile(arg1:string):Promise<void>;
 

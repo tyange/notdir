@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	stdruntime "runtime"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -419,43 +420,65 @@ func (a *App) NotdirFileOpen(id *string) (*Notdir, error) {
 	return &notdir, nil
 }
 
-func (a *App) RemoveNotdirInList(id *string) error {
-	if id == nil || *id == "" {
-		return fmt.Errorf("유효하지 않은 ID")
+func (a *App) RemoveNotdirsInList(ids []*string) error {
+	if len(ids) == 0 {
+		return fmt.Errorf("삭제할 ID 목록이 비어있습니다")
 	}
 
-	// 트랜잭션 시작
+	for _, id := range ids {
+		if id == nil || strings.TrimSpace(*id) == "" {
+			return fmt.Errorf("유효하지 않은 ID가 포함되어 있습니다")
+		}
+	}
+
 	tx, err := a.db.Begin()
 	if err != nil {
-		return fmt.Errorf("트랜잭션 시작 오류: %v", err)
+		return fmt.Errorf("트랜잭션 시작 오류: %w", err)
 	}
-	defer tx.Rollback() // 오류 발생 시 롤백
+	defer tx.Rollback()
 
-	// ID가 존재하는지 확인
-	var exists bool
-	err = tx.QueryRow("SELECT EXISTS(SELECT 1 FROM notdir WHERE id = ?)", id).Scan(&exists)
+	placeholders := make([]string, len(ids))
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		placeholders[i] = "?"
+		args[i] = *id
+	}
+	placeholderStr := strings.Join(placeholders, ",")
+
+	var count int
+	query := fmt.Sprintf("SELECT COUNT(*) FROM notdir WHERE id IN (%s)", placeholderStr)
+	err = tx.QueryRow(query, args...).Scan(&count)
 	if err != nil {
-		return fmt.Errorf("ID 존재 여부 확인 오류: %v", err)
+		return fmt.Errorf("ID 존재 여부 확인 오류: %w", err)
 	}
 
-	if !exists {
-		return fmt.Errorf("ID %s를 찾을 수 없습니다", *id)
+	if count != len(ids) {
+		return fmt.Errorf("일부 ID가 데이터베이스에 존재하지 않습니다")
 	}
 
-	// 데이터베이스에서 해당 ID의 Notdir 삭제
-	_, err = tx.Exec("DELETE FROM notdir WHERE id = ?", id)
+	deleteQuery := fmt.Sprintf("DELETE FROM notdir WHERE id IN (%s)", placeholderStr)
+	result, err := tx.Exec(deleteQuery, args...)
 	if err != nil {
-		return fmt.Errorf("Notdir 삭제 오류: %v", err)
+		return fmt.Errorf("Notdir 삭제 오류: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("영향받은 행 수 확인 오류: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("삭제된 항목이 없습니다")
 	}
 
 	// 트랜잭션 커밋
-	err = tx.Commit()
-	if err != nil {
-		return fmt.Errorf("트랜잭션 커밋 오류: %v", err)
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("트랜잭션 커밋 오류: %w", err)
 	}
 
 	return nil
 }
+
 func (a *App) SaveNotdirToDb(notdir *Notdir) error {
 	// 트랜잭션 시작
 	tx, err := a.db.Begin()

@@ -26,8 +26,8 @@ export function NotdirFileOpen(arg1) {
   return window['go']['main']['App']['NotdirFileOpen'](arg1);
 }
 
-export function RemoveNotdirInList(arg1) {
-  return window['go']['main']['App']['RemoveNotdirInList'](arg1);
+export function RemoveNotdirsInList(arg1) {
+  return window['go']['main']['App']['RemoveNotdirsInList'](arg1);
 }
 
 export function RunFile(arg1) {

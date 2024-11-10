@@ -3,14 +3,17 @@ import { makeAutoObservable } from "mobx";
 import { main } from "../../wailsjs/go/models";
 
 class NotdirBasesStore {
-  notdirsBases: main.NotdirBase[] = [];
+  notdirBases: main.NotdirBase[] = [];
+  initialNotdirBases: main.NotdirBase[] = [];
+  removingNotdirBaseIds: string[] = [];
 
   constructor() {
     makeAutoObservable(this);
   }
 
   setNotdirBases(notdirBases: main.NotdirBase[]) {
-    this.notdirsBases = notdirBases;
+    this.notdirBases = notdirBases;
+    this.initialNotdirBases = notdirBases;
   }
 
   addNotdirBase(notdir: main.Notdir) {
@@ -20,21 +23,20 @@ class NotdirBasesStore {
       Path: notdir.Path,
     });
 
-    this.notdirsBases.push(newNotdir);
-  }
-
-  removeNotdirBase(notdirId: string) {
-    this.notdirsBases = this.notdirsBases.filter(
-      (page) => page.Id !== notdirId
-    );
+    this.notdirBases.push(newNotdir);
+    this.initialNotdirBases.push(newNotdir);
   }
 
   getNotdirBaseById(notdirId: string) {
-    return this.notdirsBases.find((page) => page.Id === notdirId);
+    return this.notdirBases.find((page) => page.Id === notdirId);
+  }
+
+  updateNotdirBases(notdirBases: main.NotdirBase[]) {
+    this.notdirBases = [...notdirBases];
   }
 
   get notdirBaseCount() {
-    return this.notdirsBases.length;
+    return this.notdirBases.length;
   }
 }
 

@@ -1,11 +1,16 @@
 import classNames from "classnames";
 import { usePathSegment } from "../../hooks/usePathSegment";
 
+type PathCondition = {
+  path: string;
+  handler: () => void;
+  condition?: () => boolean;
+  disabled?: () => boolean;
+};
+
 type ButtonProps = {
   text: string;
-  handler: () => void;
-  visiblePaths: string[];
-  disabled: boolean;
+  visiblePaths: PathCondition[];
 };
 
 export type ButtonsProps = {
@@ -13,23 +18,50 @@ export type ButtonsProps = {
 };
 
 export default function Buttons({ buttons }: ButtonsProps) {
+  const currentPath = usePathSegment();
+
   const buttonClassName = (props: ButtonProps) => {
-    return classNames("btn", "join-item", { "btn-disabled": props.disabled });
+    const baseClassNames = classNames("btn", "join-item");
+    const visiblePath = props.visiblePaths.find(
+      (vp) => vp.path === currentPath
+    );
+
+    if (visiblePath) {
+      return visiblePath.disabled
+        ? classNames(baseClassNames, { "btn-disabled": visiblePath.disabled() })
+        : baseClassNames;
+    }
+
+    return baseClassNames;
+  };
+
+  const isButtonVisible = (props: ButtonProps) => {
+    const pathCondition = props.visiblePaths.find(
+      (condition) => condition.path === currentPath
+    );
+
+    if (!pathCondition) {
+      return false;
+    }
+
+    return pathCondition.condition ? pathCondition.condition() : true;
+  };
+
+  const buttonHandler = (props: ButtonProps) => {
+    return props.visiblePaths.find((vp) => vp.path === currentPath)?.handler;
   };
 
   return (
     <div className="join flex-1 flex p-5 absolute -top-20 -left-5">
-      {buttons
-        .filter((button) => button.visiblePaths.includes(usePathSegment()))
-        .map((button) => (
-          <button
-            key={button.text}
-            className={buttonClassName(button)}
-            onClick={button.handler}
-          >
-            {button.text}
-          </button>
-        ))}
+      {buttons.filter(isButtonVisible).map((button) => (
+        <button
+          key={button.text}
+          className={buttonClassName(button)}
+          onClick={buttonHandler(button)}
+        >
+          {button.text}
+        </button>
+      ))}
     </div>
   );
 }

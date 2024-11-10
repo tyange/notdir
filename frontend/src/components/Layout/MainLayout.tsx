@@ -12,7 +12,7 @@ import { frontend, main } from "../../../wailsjs/go/models";
 import { notdirsBasesStore } from "../../stores/NotdirBasesStore";
 import { notdirDetailStore } from "../../stores/NotdirDetailStore";
 
-import Buttons from "../Buttons/Buttons";
+import Buttons, { ButtonsProps } from "../Buttons/Buttons";
 import Layout from "./Layout";
 
 const MainLayout = observer(() => {
@@ -23,7 +23,7 @@ const MainLayout = observer(() => {
   const notdirFileOpen = async () => {
     const result = await NotdirFileOpen("");
 
-    if (notdirsBasesStore.notdirsBases.some((n) => n.Id === result.Id)) {
+    if (notdirsBasesStore.notdirBases.some((n) => n.Id === result.Id)) {
       ShowMessageDialog(
         new frontend.MessageDialogOptions({
           Type: "warning",
@@ -36,6 +36,8 @@ const MainLayout = observer(() => {
 
     notdirsBasesStore.addNotdirBase(result);
   };
+
+  const handleChangeNotdirList = () => {};
 
   const handleSave = async () => {
     await FileSave(
@@ -54,25 +56,42 @@ const MainLayout = observer(() => {
     setIsEdit(true);
   };
 
-  const buttonsProps = {
+  const buttonsProps: ButtonsProps = {
     buttons: [
       {
         text: "open",
-        handler: notdirFileOpen,
-        visiblePaths: ["/"],
-        disabled: false,
+        visiblePaths: [{ path: "/", handler: notdirFileOpen }],
+      },
+      {
+        text: "edit",
+
+        visiblePaths: [
+          { path: "/", condition: () => !isEdit, handler: handleEdit },
+        ],
       },
       {
         text: "back",
-        handler: () => navigate("/"),
-        visiblePaths: ["notdir"],
-        disabled: false,
+        visiblePaths: [
+          {
+            path: "notdir",
+            handler: () => navigate("/"),
+          },
+        ],
       },
       {
         text: "save",
-        handler: handleSave,
-        visiblePaths: ["notdir"],
-        disabled: !notdirDetailStore.hasAnyChanges,
+        visiblePaths: [
+          {
+            path: "/",
+            condition: () => isEdit,
+            handler: () => console.log("save"),
+          },
+          {
+            path: "notdir",
+            handler: handleSave,
+            disabled: () => !notdirDetailStore.hasAnyChanges,
+          },
+        ],
       },
     ],
   };

@@ -70,9 +70,7 @@ export default function NewPage() {
     buttons: [
       {
         text: "save",
-        handler: onSaveHandler,
-        visiblePaths: ["new"],
-        disabled: false,
+        visiblePaths: [{ path: "new", handler: onSaveHandler }],
       },
     ],
   };
