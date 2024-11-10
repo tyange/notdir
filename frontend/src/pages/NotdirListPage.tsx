@@ -70,7 +70,6 @@ const NotdirListPage = observer(() => {
   };
 
   const handleNotdirBasesChange = (notdirBases: main.NotdirBase[]) => {
-    console.log(notdirBases);
     notdirsBasesStore.updateNotdirBases(notdirBases);
   };
 
@@ -78,23 +77,26 @@ const NotdirListPage = observer(() => {
     fetchInitialData();
   }, []);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) {
+    return <Loading />;
+  }
 
-  if (isError) return <ResultState message="에러가 발생했습니다!" />;
+  if (isError) {
+    return <ResultState message="에러가 발생했습니다!" />;
+  }
 
   if (
     notdirsBasesStore.notdirBases &&
     notdirsBasesStore.notdirBases.length === 0
-  )
+  ) {
     return <ResultState message="아직 열린 Notdir가 없어요!" />;
+  }
 
   return (
     <NotdirsContainer>
       <DraggableItems<main.NotdirBase>
         draggableItems={notdirsBasesStore.notdirBases}
-        setDraggableItems={(notdirBases) =>
-          notdirsBasesStore.updateNotdirBases(notdirBases)
-        }
+        setDraggableItems={handleNotdirBasesChange}
         renderItem={renderItem}
       />
     </NotdirsContainer>

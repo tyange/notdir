@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 
@@ -37,9 +37,7 @@ const MainLayout = observer(() => {
     notdirsBasesStore.addNotdirBase(result);
   };
 
-  const handleChangeNotdirList = () => {};
-
-  const handleSave = async () => {
+  const handleNotdirSave = async () => {
     await FileSave(
       new main.Notdir({
         Id: notdirDetailStore.currentNotdirId,
@@ -50,6 +48,7 @@ const MainLayout = observer(() => {
       })
     );
     notdirDetailStore.syncWithUpdate();
+    setIsEdit(false);
   };
 
   const handleEdit = () => {
@@ -60,13 +59,23 @@ const MainLayout = observer(() => {
     buttons: [
       {
         text: "open",
-        visiblePaths: [{ path: "/", handler: notdirFileOpen }],
+        visiblePaths: [{ path: "/", handler: notdirFileOpen, order: 1 }],
       },
       {
         text: "edit",
-
         visiblePaths: [
-          { path: "/", condition: () => !isEdit, handler: handleEdit },
+          {
+            path: "/",
+            condition: () => !isEdit,
+            handler: handleEdit,
+            order: 2,
+          },
+          {
+            path: "notdir",
+            condition: () => !isEdit,
+            handler: handleEdit,
+            order: 2,
+          },
         ],
       },
       {
@@ -75,6 +84,7 @@ const MainLayout = observer(() => {
           {
             path: "notdir",
             handler: () => navigate("/"),
+            order: 1,
           },
         ],
       },
@@ -85,11 +95,14 @@ const MainLayout = observer(() => {
             path: "/",
             condition: () => isEdit,
             handler: () => console.log("save"),
+            order: 2,
           },
           {
             path: "notdir",
-            handler: handleSave,
+            condition: () => isEdit,
+            handler: handleNotdirSave,
             disabled: () => !notdirDetailStore.hasAnyChanges,
+            order: 2,
           },
         ],
       },
