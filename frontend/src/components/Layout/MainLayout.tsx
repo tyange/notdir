@@ -16,8 +16,6 @@ import Buttons, { ButtonsProps } from "../Buttons/Buttons";
 import Layout from "./Layout";
 
 const MainLayout = observer(() => {
-  const [isEdit, setIsEdit] = useState(false);
-
   const navigate = useNavigate();
 
   const notdirFileOpen = async () => {
@@ -48,11 +46,15 @@ const MainLayout = observer(() => {
       })
     );
     notdirDetailStore.syncWithUpdate();
-    setIsEdit(false);
+    notdirDetailStore.setIsEdit(false);
   };
 
-  const handleEdit = () => {
-    setIsEdit(true);
+  const handleNotdirBasesEdit = (isEdit: boolean) => {
+    notdirsBasesStore.setIsEdit(isEdit);
+  };
+
+  const handleNotdirEdit = (isEdit: boolean) => {
+    notdirDetailStore.setIsEdit(isEdit);
   };
 
   const buttonsProps: ButtonsProps = {
@@ -66,14 +68,14 @@ const MainLayout = observer(() => {
         visiblePaths: [
           {
             path: "/",
-            condition: () => !isEdit,
-            handler: handleEdit,
+            condition: () => !notdirsBasesStore.isEdit,
+            handler: () => handleNotdirBasesEdit(true),
             order: 2,
           },
           {
             path: "notdir",
-            condition: () => !isEdit,
-            handler: handleEdit,
+            condition: () => !notdirDetailStore.isEdit,
+            handler: () => handleNotdirEdit(true),
             order: 2,
           },
         ],
@@ -93,13 +95,13 @@ const MainLayout = observer(() => {
         visiblePaths: [
           {
             path: "/",
-            condition: () => isEdit,
+            condition: () => notdirsBasesStore.isEdit,
             handler: () => console.log("save"),
             order: 2,
           },
           {
             path: "notdir",
-            condition: () => isEdit,
+            condition: () => notdirDetailStore.isEdit,
             handler: handleNotdirSave,
             disabled: () => !notdirDetailStore.hasAnyChanges,
             order: 2,

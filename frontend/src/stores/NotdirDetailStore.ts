@@ -4,6 +4,7 @@ import { isEqual } from "es-toolkit";
 import { main } from "../../wailsjs/go/models";
 
 class NotdirDetailStore {
+  isEdit = false;
   currentNotdirId = "";
   notdirName = "";
   currentNotdirPath = "";
@@ -15,6 +16,10 @@ class NotdirDetailStore {
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  setIsEdit(isEdit: boolean) {
+    this.isEdit = isEdit;
   }
 
   setCurrentNotdirId(id: string) {

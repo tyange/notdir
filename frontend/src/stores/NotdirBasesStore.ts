@@ -3,12 +3,17 @@ import { makeAutoObservable } from "mobx";
 import { main } from "../../wailsjs/go/models";
 
 class NotdirBasesStore {
+  isEdit = false;
   notdirBases: main.NotdirBase[] = [];
   initialNotdirBases: main.NotdirBase[] = [];
   removingNotdirBaseIds: string[] = [];
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  setIsEdit(isEdit: boolean) {
+    this.isEdit = isEdit;
   }
 
   setNotdirBases(notdirBases: main.NotdirBase[]) {
