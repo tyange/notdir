@@ -8,12 +8,14 @@ type DraggableItemsProps<T extends WithId> = {
   draggableItems: T[];
   setDraggableItems: (updatedItems: T[]) => void;
   renderItem: (item: T, isDragging: boolean) => React.ReactNode;
+  isDisabledDrag?: boolean;
 };
 
 export default function DraggableItems<T extends WithId>({
   draggableItems,
   setDraggableItems,
   renderItem,
+  isDisabledDrag,
 }: DraggableItemsProps<T>) {
   const [isDragging, setIsDragging] = useState(false);
   const [currentDraggingNode, setCurrentDraggingNode] =
@@ -71,7 +73,7 @@ export default function DraggableItems<T extends WithId>({
         <li
           id={item.Id}
           key={item.Id}
-          draggable
+          draggable={isDisabledDrag ?? true}
           onDragStart={dragStart}
           onDragEnter={dragEnter}
           onDragOver={dragOver}

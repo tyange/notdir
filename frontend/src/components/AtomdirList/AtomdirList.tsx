@@ -1,4 +1,5 @@
 import { main } from "../../../wailsjs/go/models";
+import { useNotdirDetailStore } from "../../stores/useNotdirDetailStore";
 
 import DraggableItems from "../DraggableItems/DraggableItems";
 import AtomdirBox from "./AtomdirBox/AtomdirBox";
@@ -8,10 +9,9 @@ type AtomdirListProps = {
   setAtomdirs: (updatedNotdirs: main.Atomdir[]) => void;
 };
 
-export default function AtomdirList({
-  atomdirs,
-  setAtomdirs,
-}: AtomdirListProps) {
+const AtomdirList = ({ atomdirs, setAtomdirs }: AtomdirListProps) => {
+  const { isEdit } = useNotdirDetailStore();
+
   const renderItem = (atomdir: main.Atomdir, isDragging: boolean) => {
     return <AtomdirBox atomdir={atomdir} isDragging={isDragging} />;
   };
@@ -22,7 +22,10 @@ export default function AtomdirList({
         draggableItems={atomdirs}
         setDraggableItems={setAtomdirs}
         renderItem={renderItem}
+        isDisabledDrag={isEdit}
       />
     </ul>
   );
-}
+};
+
+export default AtomdirList;

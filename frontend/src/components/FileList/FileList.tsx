@@ -1,6 +1,5 @@
-import { Dispatch, SetStateAction } from "react";
-
 import { main } from "../../../wailsjs/go/models";
+import { useNotdirDetailStore } from "../../stores/useNotdirDetailStore";
 
 import DraggableItems from "../DraggableItems/DraggableItems";
 import FileBox from "./FileBox/FileBox";
@@ -10,7 +9,9 @@ type FileListProps = {
   setFiles: (updatedFiles: main.FileInfo[]) => void;
 };
 
-export default function FileList({ files, setFiles }: FileListProps) {
+const FileList = ({ files, setFiles }: FileListProps) => {
+  const { isEdit } = useNotdirDetailStore();
+
   const renderItem = (file: main.FileInfo, isDragging: boolean) => (
     <FileBox file={file} isDragging={isDragging} />
   );
@@ -21,7 +22,10 @@ export default function FileList({ files, setFiles }: FileListProps) {
         draggableItems={files}
         setDraggableItems={setFiles}
         renderItem={renderItem}
+        isDisabledDrag={isEdit}
       />
     </ul>
   );
-}
+};
+
+export default FileList;

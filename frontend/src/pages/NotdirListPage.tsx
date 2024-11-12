@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { observer } from "mobx-react-lite";
 
 import { ShowMessageDialog, GetInitialData } from "../../wailsjs/go/main/App";
 import { main, frontend } from "../../wailsjs/go/models";
-import { notdirsBasesStore } from "../stores/NotdirBasesStore";
 
 import NotdirBox from "../components/NotdirBox/NotdirBox";
 import NotdirsContainer from "../components/NotdirsContainer/NotdirsContainer";
 import Loading from "../components/Loading/Loading";
 import ResultState from "../components/ResultState/ResultState";
 import DraggableItems from "../components/DraggableItems/DraggableItems";
+import { useNotdirBasesStore } from "../stores/useNotdirBasesStore";
 
-const NotdirListPage = observer(() => {
+const NotdirListPage = () => {
+  const { notdirBases, isEdit, setNotdirBases, updateNotdirBases } =
+    useNotdirBasesStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -49,7 +51,7 @@ const NotdirListPage = observer(() => {
       const result = await GetInitialData();
 
       if (result) {
-        notdirsBasesStore.setNotdirBases(result);
+        setNotdirBases(result);
       }
       setIsLoading(false);
     } catch (err) {
@@ -70,7 +72,7 @@ const NotdirListPage = observer(() => {
   };
 
   const handleNotdirBasesChange = (notdirBases: main.NotdirBase[]) => {
-    notdirsBasesStore.updateNotdirBases(notdirBases);
+    updateNotdirBases(notdirBases);
   };
 
   useEffect(() => {
@@ -85,22 +87,20 @@ const NotdirListPage = observer(() => {
     return <ResultState message="에러가 발생했습니다!" />;
   }
 
-  if (
-    notdirsBasesStore.notdirBases &&
-    notdirsBasesStore.notdirBases.length === 0
-  ) {
+  if (notdirBases && notdirBases.length === 0) {
     return <ResultState message="아직 열린 Notdir가 없어요!" />;
   }
 
   return (
     <NotdirsContainer>
       <DraggableItems<main.NotdirBase>
-        draggableItems={notdirsBasesStore.notdirBases}
+        draggableItems={notdirBases}
         setDraggableItems={handleNotdirBasesChange}
         renderItem={renderItem}
+        isDisabledDrag={isEdit}
       />
     </NotdirsContainer>
   );
-});
+};
 
 export default NotdirListPage;
